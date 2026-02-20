@@ -2,9 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 
 require('dotenv').config();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads', 'accommodations');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(cors());
 app.use(express.json());

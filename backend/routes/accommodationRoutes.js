@@ -26,7 +26,7 @@ const parseBodyField = (val) => {
     return val;
 };
 
-const HOST_OTP = im;
+const HOST_OTP = '9876';
 
 // POST /api/accommodation/login - Host login (phone + OTP)
 accommodationRoutes.post('/login', async (req, res) => {
@@ -68,7 +68,7 @@ accommodationRoutes.post('/', handleMulterError(uploadImages), async (req, res) 
     try {
         const {
             name, address, city, price, description,
-            roomspace, amenities, host, availability, reviews
+            roomspace, amenities, host, reviews
         } = req.body;
 
         const roomspaceObj = parseBodyField(roomspace);
@@ -84,8 +84,11 @@ accommodationRoutes.post('/', handleMulterError(uploadImages), async (req, res) 
         if (!imagePaths.length) {
             return res.status(400).json({ error: 'At least one image is required' });
         }
-        if (!roomspaceObj || roomspaceObj.total_space === undefined || roomspaceObj.available_space === undefined) {
-            return res.status(400).json({ error: 'roomspace.total_space and roomspace.available_space are required' });
+        const totalSpaceNum = roomspaceObj && (roomspaceObj.total_space !== undefined && roomspaceObj.total_space !== '')
+            ? Number(roomspaceObj.total_space)
+            : undefined;
+        if (totalSpaceNum === undefined || isNaN(totalSpaceNum)) {
+            return res.status(400).json({ error: 'roomspace.total_space is required' });
         }
         if (!hostObj?.name || !hostObj?.email || !hostObj?.phone) {
             return res.status(400).json({ error: 'host.name, host.email and host.phone are required' });
@@ -98,10 +101,9 @@ accommodationRoutes.post('/', handleMulterError(uploadImages), async (req, res) 
             price: Number(price),
             description,
             images: imagePaths,
-            roomspace: roomspaceObj || { total_space: 0, available_space: 0 },
+            roomspace: { total_space: totalSpaceNum, available_space: totalSpaceNum },
             amenities: Array.isArray(amenitiesArr) ? amenitiesArr : [],
             host: hostObj,
-            availability: availability === 'false' ? false : availability !== false,
             reviews: Array.isArray(reviewsArr) ? reviewsArr : []
         });
 

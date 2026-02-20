@@ -31,8 +31,7 @@ const accomodationSchema = new mongoose.Schema({
             required: true
         },
         available_space: {
-            type: Number,
-            required: true
+            type: Number
         }
     },
     amenities: [{
