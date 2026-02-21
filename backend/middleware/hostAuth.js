@@ -15,8 +15,11 @@ const hostAuth = (req, res, next) => {
         if (decoded.role !== 'host') {
             return res.status(403).json({ error: 'Access denied.' });
         }
+        if (!decoded.hostId) {
+            return res.status(401).json({ error: 'Invalid token. Please login again.' });
+        }
 
-        req.user = decoded;
+        req.hostData = decoded;
         next();
     } catch (err) {
         if (err.name === 'TokenExpiredError') {

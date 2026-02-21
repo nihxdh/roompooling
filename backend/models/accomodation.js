@@ -51,9 +51,9 @@ const accomodationSchema = new mongoose.Schema({
         required: true
     },
     host: {
-        name: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, required: true }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Host',
+        required: true
     },
     status: {
         type: String,

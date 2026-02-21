@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Accomodation = require('../models/accomodation');
+const Booking = require('../models/booking');
 const adminAuth = require('../middleware/adminAuth');
 const adminRoutes = express.Router();
 const validOccupations = ['Student', 'Employee', 'Other'];
@@ -127,7 +128,7 @@ adminRoutes.get('/accommodations', adminAuth, async (req, res) => {
     try {
         const { status } = req.query;
         const filter = status ? { status } : {};
-        const accommodations = await Accomodation.find(filter).sort({ createdAt: -1 });
+        const accommodations = await Accomodation.find(filter).populate('host').sort({ createdAt: -1 });
         res.json({ success: true, accommodations });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -137,7 +138,7 @@ adminRoutes.get('/accommodations', adminAuth, async (req, res) => {
 // GET /api/admin/accommodations/:id - Get single accommodation by ID
 adminRoutes.get('/accommodations/:id', adminAuth, async (req, res) => {
     try {
-        const accommodation = await Accomodation.findById(req.params.id);
+        const accommodation = await Accomodation.findById(req.params.id).populate('host');
         if (!accommodation) return res.status(404).json({ error: 'Accommodation not found' });
         res.json({ success: true, accommodation });
     } catch (err) {
@@ -156,9 +157,29 @@ adminRoutes.put('/accommodations/:id/verify', adminAuth, async (req, res) => {
             req.params.id,
             { status },
             { new: true }
-        );
+        ).populate('host');
         if (!accommodation) return res.status(404).json({ error: 'Accommodation not found' });
         res.json({ success: true, accommodation });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ========== Bookings overview (protected) ==========
+
+// GET /api/admin/bookings - List all bookings (optional ?status filter)
+adminRoutes.get('/bookings', adminAuth, async (req, res) => {
+    try {
+        const { status } = req.query;
+        const filter = status ? { status } : {};
+
+        const bookings = await Booking.find(filter)
+            .populate('user', 'name email phone')
+            .populate('accommodation', 'name address city price')
+            .populate('host', 'name email phone')
+            .sort({ createdAt: -1 });
+
+        res.json({ success: true, bookings });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

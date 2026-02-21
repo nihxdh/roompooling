@@ -1,9 +1,12 @@
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+
 const app = express();
+const server = http.createServer(app);
 
 require('dotenv').config();
 
@@ -19,18 +22,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
-const accommodationRoutes = require('./routes/accommodationRoutes');
+const hostRoutes = require('./routes/hostRoutes');
 
-// Admin login (public)
 app.use('/api/admin', adminRoutes);
-
-// User routes
 app.use('/api/user', userRoutes);
+app.use('/api/host', hostRoutes);
 
-// Accommodation - POST for new listings (always pending)
-app.use('/api/accommodation', accommodationRoutes);
+// Socket.IO
+const initSocket = require('./config/socket');
+initSocket(server);
 
-
+// DB & Start
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
@@ -45,9 +47,8 @@ async function connectDB() {
 
 connectDB();
 
-
 const PORT = process.env.PORT;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

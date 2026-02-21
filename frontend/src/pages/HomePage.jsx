@@ -5,11 +5,16 @@ import {
   UserIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
+import homeBackground from '../assets/homeBackground.png'
 
 function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center bg-slate-50 px-6 py-16">
-      <main className="w-full max-w-4xl flex-1 flex flex-col justify-center">
+    <div className="min-h-screen flex flex-col items-center bg-slate-50 px-6 py-16 relative overflow-hidden">
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-25 pointer-events-none"
+        style={{ backgroundImage: `url(${homeBackground})` }}
+      />
+      <main className="w-full max-w-4xl flex-1 flex flex-col justify-center relative z-10">
         <section className="w-full text-center mb-16">
           <p className="animate-slide-up text-base font-semibold text-[#2363EB] uppercase tracking-widest mb-4">
             Room sharing platform
@@ -44,11 +49,11 @@ function HomePage() {
         </section>
       </main>
 
-      <blockquote className="text-slate-500 italic text-center py-8 animate-slide-up-delay-4">
+      <blockquote className="text-slate-500 italic text-center py-8 animate-slide-up-delay-4 relative z-10">
         &ldquo;Find your place. Share your space.&rdquo;
       </blockquote>
 
-      <div className="w-full flex justify-center pb-8 animate-slide-up-delay-5">
+      <div className="w-full flex justify-center pb-8 animate-slide-up-delay-5 relative z-10">
         <Link
           to="/login/admin"
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[#2363EB] text-[#2363EB] font-medium hover:bg-[#2363EB] hover:text-white hover:scale-105 transition-all duration-300 cursor-pointer"
