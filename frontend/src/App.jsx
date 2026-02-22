@@ -6,6 +6,9 @@ import SeekerLoginPage from './pages/login/SeekerLoginPage'
 import AdminLoginPage from './pages/login/AdminLoginPage'
 import AdminDashboard from './pages/AdminDashboard'
 import HostDashboard from './pages/HostDashboard'
+import HostAccommodationDetail from './pages/HostAccommodationDetail'
+import HostBookings from './pages/HostBookings'
+import HostMessages from './pages/HostMessages'
 import SeekerDashboard from './pages/SeekerDashboard'
 import SeekerProfile from './pages/SeekerProfile'
 import SeekerBookings from './pages/SeekerBookings'
@@ -19,6 +22,9 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login/host" element={<HostLoginPage />} />
         <Route path="/host/dashboard" element={<HostDashboard />} />
+        <Route path="/host/accommodation/:id" element={<HostAccommodationDetail />} />
+        <Route path="/host/bookings" element={<HostBookings />} />
+        <Route path="/host/messages" element={<HostMessages />} />
         <Route path="/login/seeker" element={<SeekerLoginPage />} />
         <Route path="/seeker/dashboard" element={<SeekerDashboard />} />
         <Route path="/seeker/profile" element={<SeekerProfile />} />

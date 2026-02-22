@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const fs = require('fs');
 const Host = require('../models/host');
 const Accomodation = require('../models/accomodation');
 const Booking = require('../models/booking');
@@ -11,6 +12,28 @@ const { uploadImages, slugify } = require('../config/multer');
 const hostRoutes = express.Router();
 
 const HOST_OTP = '9876';
+
+async function getAvailableSpacesForDates(accommodationId, checkIn, checkOut, excludeBookingId) {
+    const accommodation = await Accomodation.findById(accommodationId);
+    if (!accommodation) return null;
+
+    const filter = {
+        accommodation: accommodationId,
+        status: 'confirmed',
+        checkIn: { $lt: new Date(checkOut) },
+        checkOut: { $gt: new Date(checkIn) }
+    };
+    if (excludeBookingId) filter._id = { $ne: excludeBookingId };
+
+    const overlapping = await Booking.find(filter);
+    const bookedSpaces = overlapping.reduce((sum, b) => sum + b.spaces, 0);
+
+    return {
+        total: accommodation.roomspace.total_space,
+        booked: bookedSpaces,
+        available: Math.max(0, accommodation.roomspace.total_space - bookedSpaces)
+    };
+}
 
 const handleMulterError = (fn) => (req, res, next) => {
     fn(req, res, (err) => {
@@ -177,11 +200,12 @@ hostRoutes.post('/accommodations', hostAuth, async (req, res) => {
     if (multerDone) return;
 
     try {
-        const { name, address, city, price, description, roomspace, amenities, reviews } = req.body;
+        const { name, address, city, price, description, roomspace, amenities, reviews, houseRules } = req.body;
 
         const roomspaceObj = parseBodyField(roomspace);
         const amenitiesArr = parseBodyField(amenities);
         const reviewsArr = parseBodyField(reviews);
+        const houseRulesObj = parseBodyField(houseRules);
 
         const folderName = slugify(name || 'unnamed');
         const imagePaths = (req.files || []).map(f => `/uploads/accommodations/${folderName}/${f.filename}`);
@@ -210,7 +234,8 @@ hostRoutes.post('/accommodations', hostAuth, async (req, res) => {
             roomspace: { total_space: totalSpaceNum, available_space: totalSpaceNum },
             amenities: Array.isArray(amenitiesArr) ? amenitiesArr : [],
             host: hostId,
-            reviews: Array.isArray(reviewsArr) ? reviewsArr : []
+            reviews: Array.isArray(reviewsArr) ? reviewsArr : [],
+            houseRules: houseRulesObj || {}
         });
 
         res.status(201).json({
@@ -239,7 +264,7 @@ hostRoutes.put('/accommodations/:id', hostAuth, async (req, res) => {
         const accommodation = await Accomodation.findOne({ _id: req.params.id, host: hostId });
         if (!accommodation) return res.status(404).json({ error: 'Accommodation not found' });
 
-        const { name, address, city, price, description, images, roomspace, amenities, availability, reviews } = req.body;
+        const { name, address, city, price, description, images, roomspace, amenities, availability, reviews, houseRules } = req.body;
         const updates = {};
 
         if (name !== undefined) updates.name = name;
@@ -251,13 +276,27 @@ hostRoutes.put('/accommodations/:id', hostAuth, async (req, res) => {
         if (amenities !== undefined) updates.amenities = parseBodyField(amenities) || [];
         if (availability !== undefined) updates.availability = availability === 'false' ? false : availability !== false;
         if (reviews !== undefined) updates.reviews = parseBodyField(reviews) || [];
+        if (houseRules !== undefined) updates.houseRules = parseBodyField(houseRules) || {};
 
-        if (req.files?.length) {
+        const keptImages = parseBodyField(req.body.existingImages) || [];
+        const validKept = Array.isArray(keptImages)
+            ? keptImages.filter(img => accommodation.images.includes(img))
+            : [];
+
+        const newUploadPaths = (req.files || []).map(f => {
             const accName = name || accommodation.name || 'unnamed';
             const folderName = slugify(accName);
-            updates.images = req.files.map(f => `/uploads/accommodations/${folderName}/${f.filename}`);
-        } else if (images !== undefined) {
-            updates.images = parseBodyField(images) || [];
+            return `/uploads/accommodations/${folderName}/${f.filename}`;
+        });
+
+        if (req.body.existingImages !== undefined || req.files?.length) {
+            updates.images = [...validKept, ...newUploadPaths];
+
+            const removedImages = accommodation.images.filter(img => !validKept.includes(img));
+            for (const imgPath of removedImages) {
+                const fullPath = path.join(__dirname, '..', imgPath);
+                fs.unlink(fullPath, () => {});
+            }
         }
 
         const updated = await Accomodation.findByIdAndUpdate(req.params.id, updates, { new: true });
@@ -275,6 +314,43 @@ hostRoutes.delete('/accommodations/:id', hostAuth, async (req, res) => {
 
         await Accomodation.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: 'Accommodation deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/host/accommodations/:id/bookings - Bookings for a specific accommodation
+hostRoutes.get('/accommodations/:id/bookings', hostAuth, async (req, res) => {
+    try {
+        const accommodation = await Accomodation.findOne({ _id: req.params.id, host: req.hostData.hostId });
+        if (!accommodation) return res.status(404).json({ error: 'Accommodation not found' });
+
+        const { status } = req.query;
+        const filter = { accommodation: req.params.id, host: req.hostData.hostId };
+        if (status) filter.status = status;
+
+        const bookings = await Booking.find(filter)
+            .populate('user', 'name email phone occupation')
+            .sort({ createdAt: -1 });
+
+        res.json({ success: true, bookings });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/host/accommodations/:id/availability?date=YYYY-MM-DD
+hostRoutes.get('/accommodations/:id/availability', hostAuth, async (req, res) => {
+    try {
+        const accommodation = await Accomodation.findOne({ _id: req.params.id, host: req.hostData.hostId });
+        if (!accommodation) return res.status(404).json({ error: 'Accommodation not found' });
+
+        const date = req.query.date ? new Date(req.query.date) : new Date();
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        const availability = await getAvailableSpacesForDates(req.params.id, date, nextDay);
+        res.json({ success: true, ...availability });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -313,16 +389,26 @@ hostRoutes.put('/bookings/:id/confirm', hostAuth, async (req, res) => {
         const accommodation = await Accomodation.findById(booking.accommodation);
         if (!accommodation) return res.status(404).json({ error: 'Accommodation not found' });
 
-        if (booking.spaces > accommodation.roomspace.available_space) {
-            return res.status(400).json({ error: `Only ${accommodation.roomspace.available_space} space(s) available` });
+        // Date-aware availability check (exclude this booking from the count)
+        const availability = await getAvailableSpacesForDates(
+            booking.accommodation, booking.checkIn, booking.checkOut, booking._id
+        );
+        if (booking.spaces > availability.available) {
+            const msg = availability.available === 0
+                ? 'No spaces available for these booking dates. Other confirmed bookings overlap.'
+                : `Only ${availability.available} space(s) available for these dates`;
+            return res.status(400).json({ error: msg });
         }
-
-        // Decrement available space
-        accommodation.roomspace.available_space -= booking.spaces;
-        await accommodation.save();
 
         booking.status = 'confirmed';
         await booking.save();
+
+        // Update the static available_space as a general indicator
+        const currentMin = await getAvailableSpacesForDates(
+            booking.accommodation, new Date(), new Date('2099-12-31')
+        );
+        accommodation.roomspace.available_space = currentMin.available;
+        await accommodation.save();
 
         const populated = await Booking.findById(booking._id)
             .populate('user', 'name email phone occupation')

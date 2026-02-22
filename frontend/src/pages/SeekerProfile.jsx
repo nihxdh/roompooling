@@ -12,6 +12,8 @@ import {
   CalendarDaysIcon,
   BriefcaseIcon,
   UserIcon,
+  SparklesIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import SeekerSidebar from '../components/SeekerSidebar'
 import SuccessModal from '../components/SuccessModal'
@@ -32,6 +34,13 @@ function SeekerProfile() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  const [prefs, setPrefs] = useState({})
+  const [prefsForm, setPrefsForm] = useState({})
+  const [prefsEditing, setPrefsEditing] = useState(false)
+  const [prefsSaving, setPrefsSaving] = useState(false)
+  const [prefsError, setPrefsError] = useState('')
+  const [langInput, setLangInput] = useState('')
 
   const api = useCallback(() => axios.create({
     baseURL: API_BASE,
@@ -63,13 +72,70 @@ function SeekerProfile() {
     }
   }, [api, navigate])
 
+  const PREF_OPTIONS = {
+    stayDuration: { label: 'Stay Duration', options: ['Short-term (<3 months)', 'Medium (3-6 months)', 'Long-term (6+ months)'] },
+    foodPreference: { label: 'Food Preference', options: ['Vegetarian', 'Non-Vegetarian', 'Vegan', 'No Preference'] },
+    smoking: { label: 'Smoking', options: ['Smoker', 'Non-Smoker'] },
+    drinking: { label: 'Drinking', options: ['Drinks', "Doesn't Drink"] },
+    guestPolicy: { label: 'Guest Policy', options: ['Guests Welcome', 'Occasional Guests', 'No Guests'] },
+    cleanlinessLevel: { label: 'Cleanliness', options: ['Very Clean', 'Moderate', 'Relaxed'] },
+    noiseTolerance: { label: 'Noise Tolerance', options: ['Quiet', 'Moderate', 'Lively'] },
+    workSchedule: { label: 'Work Schedule', options: ['Regular (9-5)', 'Flexible', 'Night Owl'] },
+    wakeUpTime: { label: 'Wake-up Time', options: ['Early (Before 7 AM)', 'Morning (7-9 AM)', 'Late (After 9 AM)'] },
+    sleepTime: { label: 'Sleep Time', options: ['Early (Before 10 PM)', 'Night (10 PM-12 AM)', 'Late Night (After 12 AM)'] },
+    petPreference: { label: 'Pet Preference', options: ['Love Pets', 'Okay with Pets', 'No Pets'] },
+    cookingHabits: { label: 'Cooking Habits', options: ['Cooks Daily', 'Sometimes', 'Rarely/Never'] },
+    socialNature: { label: 'Social Nature', options: ['Introvert', 'Ambivert', 'Extrovert'] },
+    sharingResponsibility: { label: 'Sharing', options: ['Happy to Share', 'Prefer Separate', 'Flexible'] },
+  }
+
+  const fetchPreferences = useCallback(async () => {
+    try {
+      const { data } = await api().get('/api/user/preferences')
+      setPrefs(data.preferences || {})
+      setPrefsForm(data.preferences || {})
+    } catch { /* preferences not set yet */ }
+  }, [api])
+
+  const savePreferences = async () => {
+    setPrefsSaving(true)
+    setPrefsError('')
+    try {
+      const payload = { ...prefsForm }
+      if (!payload.languages) payload.languages = []
+      const { data } = await api().put('/api/user/preferences', payload)
+      setPrefs(data.preferences)
+      setPrefsForm(data.preferences)
+      setPrefsEditing(false)
+    } catch (err) {
+      setPrefsError(err.response?.data?.message || 'Failed to save preferences')
+    } finally {
+      setPrefsSaving(false)
+    }
+  }
+
+  const addLanguage = () => {
+    const trimmed = langInput.trim()
+    if (!trimmed) return
+    const current = prefsForm.languages || []
+    if (!current.includes(trimmed)) {
+      setPrefsForm(p => ({ ...p, languages: [...current, trimmed] }))
+    }
+    setLangInput('')
+  }
+
+  const removeLanguage = (lang) => {
+    setPrefsForm(p => ({ ...p, languages: (p.languages || []).filter(l => l !== lang) }))
+  }
+
   useEffect(() => {
     if (!token) {
       navigate('/login/seeker', { replace: true })
       return
     }
     fetchProfile()
-  }, [token, navigate, fetchProfile])
+    fetchPreferences()
+  }, [token, navigate, fetchProfile, fetchPreferences])
 
   const handleSave = async () => {
     setSaving(true)
@@ -305,6 +371,148 @@ function SeekerProfile() {
                         <>
                           <CheckIcon className="h-5 w-5" />
                           Save Changes
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Lifestyle Preferences */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-8 lg:p-10">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+                        <SparklesIcon className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-slate-900">Lifestyle Preferences</h2>
+                        <p className="text-sm text-slate-400">Help us find your perfect roommate match</p>
+                      </div>
+                    </div>
+                    {!prefsEditing ? (
+                      <button
+                        onClick={() => { setPrefsEditing(true); setPrefsForm({ ...prefs }) }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 text-violet-600 text-sm font-semibold hover:bg-violet-100 transition-colors"
+                      >
+                        <PencilSquareIcon className="h-4 w-4" />
+                        {Object.keys(prefs).filter(k => prefs[k] !== undefined && prefs[k] !== null && !(Array.isArray(prefs[k]) && prefs[k].length === 0)).length > 0 ? 'Edit' : 'Set Up'}
+                      </button>
+                    ) : null}
+                  </div>
+
+                  {prefsError && (
+                    <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">{prefsError}</div>
+                  )}
+
+                  {!prefsEditing ? (
+                    Object.keys(prefs).filter(k => prefs[k] !== undefined && prefs[k] !== null && !(Array.isArray(prefs[k]) && prefs[k].length === 0)).length === 0 ? (
+                      <div className="text-center py-10">
+                        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                          <SparklesIcon className="h-8 w-8 text-slate-300" />
+                        </div>
+                        <p className="text-slate-400 text-base">No preferences set yet</p>
+                        <p className="text-slate-300 text-sm mt-1">Set up your lifestyle preferences to get smart roommate suggestions</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-5">
+                        {Object.entries(PREF_OPTIONS).map(([key, { label }]) => {
+                          const val = prefs[key]
+                          if (!val) return null
+                          return (
+                            <div key={key} className="flex items-center justify-between py-2">
+                              <span className="text-sm font-medium text-slate-500">{label}</span>
+                              <span className="px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 text-sm font-semibold">{val}</span>
+                            </div>
+                          )
+                        })}
+                        {prefs.languages?.length > 0 && (
+                          <div className="pt-2">
+                            <span className="text-sm font-medium text-slate-500">Languages</span>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {prefs.languages.map(l => (
+                                <span key={l} className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-sm font-medium">{l}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  ) : (
+                    <div className="space-y-6">
+                      {Object.entries(PREF_OPTIONS).map(([key, { label, options }]) => (
+                        <div key={key}>
+                          <label className="text-sm font-semibold text-slate-600 mb-2.5 block">{label}</label>
+                          <div className="flex flex-wrap gap-2">
+                            {options.map(opt => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => setPrefsForm(p => ({ ...p, [key]: p[key] === opt ? undefined : opt }))}
+                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                                  prefsForm[key] === opt
+                                    ? 'bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-600/25'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300 hover:text-violet-600'
+                                }`}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+
+                      <div>
+                        <label className="text-sm font-semibold text-slate-600 mb-2.5 block">Languages</label>
+                        <div className="flex gap-2 mb-3">
+                          <input
+                            type="text"
+                            value={langInput}
+                            onChange={e => setLangInput(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addLanguage())}
+                            placeholder="Type a language and press Enter"
+                            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 outline-none"
+                          />
+                          <button type="button" onClick={addLanguage} className="px-4 py-2.5 rounded-xl bg-violet-100 text-violet-700 text-sm font-semibold hover:bg-violet-200 transition-colors">Add</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {(prefsForm.languages || []).map(l => (
+                            <span key={l} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-sm font-medium">
+                              {l}
+                              <button type="button" onClick={() => removeLanguage(l)} className="hover:text-red-500 transition-colors">
+                                <XMarkIcon className="h-3.5 w-3.5" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {prefsEditing && (
+                  <div className="px-8 lg:px-10 py-5 border-t border-slate-100 bg-slate-50/50 rounded-b-3xl flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => { setPrefsEditing(false); setPrefsForm({ ...prefs }); setPrefsError('') }}
+                      className="px-6 py-3 rounded-xl text-base font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                    >
+                      Discard
+                    </button>
+                    <button
+                      onClick={savePreferences}
+                      disabled={prefsSaving}
+                      className="flex items-center gap-2 px-7 py-3 rounded-xl bg-violet-600 text-white text-base font-semibold hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-violet-600/25"
+                    >
+                      {prefsSaving ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <CheckIcon className="h-5 w-5" />
+                          Save Preferences
                         </>
                       )}
                     </button>
