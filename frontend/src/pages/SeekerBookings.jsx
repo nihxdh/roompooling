@@ -101,7 +101,7 @@ function SeekerBookings() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.key
-                    ? 'bg-sky-600 text-white shadow-sm'
+                    ? 'bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
@@ -112,7 +112,7 @@ function SeekerBookings() {
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-              <div className="w-10 h-10 border-[3px] border-slate-200 border-t-sky-600 rounded-full animate-spin mb-4" />
+              <div className="w-10 h-10 border-[3px] border-slate-200 border-t-[#8A7BF9] rounded-full animate-spin mb-4" />
               <p className="text-sm font-medium">Loading bookings...</p>
             </div>
           ) : error ? (
@@ -124,7 +124,7 @@ function SeekerBookings() {
               <p className="text-sm">Browse accommodations and make your first booking.</p>
               <button
                 onClick={() => navigate('/seeker/dashboard')}
-                className="mt-4 px-5 py-2.5 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors"
+                className="mt-4 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] hover:opacity-95 rounded-lg transition-colors"
               >
                 Browse Accommodations
               </button>
@@ -152,7 +152,7 @@ function SeekerBookings() {
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div>
                           <h3
-                            className="text-base font-bold text-slate-900 hover:text-sky-700 cursor-pointer transition-colors"
+                            className="text-base font-bold text-slate-900 hover:text-[#8A7BF9] cursor-pointer transition-colors"
                             onClick={() => navigate(`/seeker/accommodation/${acc?._id}`)}
                           >
                             {acc?.name || 'Accommodation'}
@@ -177,7 +177,7 @@ function SeekerBookings() {
                       {b.selectedAmenities?.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {b.selectedAmenities.map((am, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[11px] text-sky-700">
+                            <span key={i} className="px-2 py-0.5 rounded-md bg-[#8A7BF9]/10 border border-[#8A7BF9]/20 text-[11px] text-[#8A7BF9]">
                               {am.name} — ₹{am.rate}
                             </span>
                           ))}

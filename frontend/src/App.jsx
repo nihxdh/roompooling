@@ -1,10 +1,13 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import HostLoginPage from './pages/login/HostLoginPage'
 import SeekerLoginPage from './pages/login/SeekerLoginPage'
 import AdminLoginPage from './pages/login/AdminLoginPage'
-import AdminDashboard from './pages/AdminDashboard'
+import AdminLayout from './layouts/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminBookings from './pages/admin/AdminBookings'
+import AdminUserManagement from './pages/admin/AdminUserManagement'
 import HostDashboard from './pages/HostDashboard'
 import HostAccommodationDetail from './pages/HostAccommodationDetail'
 import HostBookings from './pages/HostBookings'
@@ -32,7 +35,12 @@ function App() {
         <Route path="/seeker/chat" element={<SeekerChat />} />
         <Route path="/seeker/accommodation/:id" element={<SeekerAccommodationDetail />} />
         <Route path="/login/admin" element={<AdminLoginPage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="users" element={<AdminUserManagement />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )

@@ -15,7 +15,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_U
 
 function getScoreColor(score) {
   if (score >= 80) return { ring: 'ring-emerald-400', text: 'text-emerald-600', bg: 'bg-emerald-50', stroke: '#10b981' }
-  if (score >= 60) return { ring: 'ring-sky-400', text: 'text-sky-600', bg: 'bg-sky-50', stroke: '#0ea5e9' }
+  if (score >= 60) return { ring: 'ring-[#8A7BF9]', text: 'text-[#8A7BF9]', bg: 'bg-[#8A7BF9]/10', stroke: '#8A7BF9' }
   if (score >= 40) return { ring: 'ring-amber-400', text: 'text-amber-600', bg: 'bg-amber-50', stroke: '#f59e0b' }
   return { ring: 'ring-red-400', text: 'text-red-500', bg: 'bg-red-50', stroke: '#ef4444' }
 }
@@ -114,15 +114,15 @@ function SeekerDashboard() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name, city, or address..."
-                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm placeholder-slate-400 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all"
+                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm placeholder-slate-400 focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all"
               />
             </div>
             <button
               onClick={() => setSmartMode(p => !p)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
                 smartMode
-                  ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-600/25'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600'
+                  ? 'bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white shadow-lg shadow-[#8A7BF9]/25'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:border-[#8A7BF9] hover:text-[#8A7BF9]'
               }`}
             >
               <SparklesIcon className="h-4 w-4" />
@@ -131,14 +131,14 @@ function SeekerDashboard() {
           </div>
 
           {smartMode && !loading && (
-            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100">
+            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-[#8A7BF9]/10 to-[#B4A3FD]/10 border border-[#8A7BF9]/20">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <SparklesIcon className="h-4 w-4 text-violet-600" />
+                <div className="w-8 h-8 rounded-lg bg-[#8A7BF9]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <SparklesIcon className="h-4 w-4 text-[#8A7BF9]" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-violet-900">Smart Match Active</p>
-                  <p className="text-xs text-violet-600 mt-0.5">
+                  <p className="text-sm font-semibold text-[#8A7BF9]">Smart Match Active</p>
+                  <p className="text-xs text-[#8A7BF9]/80 mt-0.5">
                     Listings are ranked by compatibility with your lifestyle preferences and existing roommates.
                     {!accommodations[0]?.compatibility && ' Set up your preferences in your profile to get personalized matches.'}
                   </p>
@@ -149,7 +149,7 @@ function SeekerDashboard() {
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-              <div className="w-10 h-10 border-[3px] border-slate-200 border-t-sky-600 rounded-full animate-spin mb-4" />
+              <div className="w-10 h-10 border-[3px] border-slate-200 border-t-[#8A7BF9] rounded-full animate-spin mb-4" />
               <p className="text-sm font-medium">{smartMode ? 'Finding best matches...' : 'Loading accommodations...'}</p>
             </div>
           ) : error ? (

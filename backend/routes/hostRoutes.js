@@ -9,6 +9,7 @@ const Conversation = require('../models/conversation');
 const Message = require('../models/message');
 const hostAuth = require('../middleware/hostAuth');
 const { uploadImages, slugify } = require('../config/multer');
+const { calculateBookingPrice } = require('../utils/bookingPricing');
 const hostRoutes = express.Router();
 
 const HOST_OTP = '9876';
@@ -402,6 +403,24 @@ hostRoutes.put('/bookings/:id/confirm', hostAuth, async (req, res) => {
 
         booking.status = 'confirmed';
         await booking.save();
+
+        // Recalculate totalPrice for all overlapping confirmed bookings (split rent among co-tenants)
+        const overlappingConfirmed = await Booking.find({
+            accommodation: booking.accommodation,
+            status: 'confirmed',
+            checkIn: { $lt: booking.checkOut },
+            checkOut: { $gt: booking.checkIn }
+        });
+        for (const b of overlappingConfirmed) {
+            const newPrice = calculateBookingPrice(
+                { checkIn: b.checkIn, checkOut: b.checkOut, spaces: b.spaces, selectedAmenities: b.selectedAmenities || [] },
+                overlappingConfirmed,
+                accommodation,
+                { includeSelf: false }
+            );
+            b.totalPrice = newPrice;
+            await b.save();
+        }
 
         // Update the static available_space as a general indicator
         const currentMin = await getAvailableSpacesForDates(

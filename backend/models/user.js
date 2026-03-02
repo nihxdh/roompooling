@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
         enum: ['Student', 'Employee', 'Other'],
         default: 'Other'
     },
+    password: {
+        type: String,
+        required: false,
+        select: false
+    },
     preferences: {
         stayDuration: {
             type: String,

@@ -101,7 +101,12 @@ function SeekerAccommodationDetail() {
           `${API_BASE}/api/user/accommodations/${id}/availability`,
           {
             headers: { Authorization: `Bearer ${token}` },
-            params: { checkIn: bookingForm.checkIn, checkOut: bookingForm.checkOut },
+            params: {
+              checkIn: bookingForm.checkIn,
+              checkOut: bookingForm.checkOut,
+              spaces: bookingForm.spaces || 1,
+              selectedAmenities: JSON.stringify(bookingForm.selectedAmenities || []),
+            },
             signal: controller.signal,
           }
         )
@@ -114,7 +119,7 @@ function SeekerAccommodationDetail() {
     }
     fetchAvailability()
     return () => controller.abort()
-  }, [bookingForm.checkIn, bookingForm.checkOut, id, token])
+  }, [bookingForm.checkIn, bookingForm.checkOut, bookingForm.spaces, bookingForm.selectedAmenities, id, token])
 
   const handleBooking = async (e) => {
     e.preventDefault()
@@ -173,7 +178,7 @@ function SeekerAccommodationDetail() {
         <main className="px-6 lg:px-10 py-8 max-w-4xl">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-              <div className="w-10 h-10 border-[3px] border-slate-200 border-t-sky-600 rounded-full animate-spin mb-4" />
+              <div className="w-10 h-10 border-[3px] border-slate-200 border-t-[#8A7BF9] rounded-full animate-spin mb-4" />
               <p className="text-sm font-medium">Loading...</p>
             </div>
           ) : error ? (
@@ -208,7 +213,7 @@ function SeekerAccommodationDetail() {
                         <button
                           key={i}
                           onClick={() => setActiveImage(i)}
-                          className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === activeImage ? 'border-sky-500 ring-2 ring-sky-500/20' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                          className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === activeImage ? 'border-[#8A7BF9] ring-2 ring-[#8A7BF9]/20' : 'border-transparent opacity-60 hover:opacity-100'}`}
                         >
                           <img src={`${imageBase}${img}`} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none' }} />
                         </button>
@@ -262,7 +267,7 @@ function SeekerAccommodationDetail() {
                   <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-3">Amenities</h3>
                   <div className="flex flex-wrap gap-2">
                     {a.amenities.map((am, i) => (
-                      <span key={i} className="px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-100 text-sm text-sky-700">
+                      <span key={i} className="px-3 py-1.5 rounded-lg bg-[#8A7BF9]/10 border border-[#8A7BF9]/20 text-sm text-[#8A7BF9]">
                         {am.name} {am.rate ? `— ₹${am.rate}` : ''}
                       </span>
                     ))}
@@ -274,7 +279,7 @@ function SeekerAccommodationDetail() {
               {a.houseRules && Object.values(a.houseRules).some(v => v !== undefined && v !== null) && (
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
                   <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <ShieldCheckIcon className="h-4 w-4 text-violet-500" /> House Rules
+                    <ShieldCheckIcon className="h-4 w-4 text-[#8A7BF9]" /> House Rules
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {a.houseRules.genderAllowed && a.houseRules.genderAllowed !== 'Any' && (
@@ -333,16 +338,16 @@ function SeekerAccommodationDetail() {
               {compatLoading ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 border-2 border-slate-200 border-t-violet-500 rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-slate-200 border-t-[#8A7BF9] rounded-full animate-spin" />
                     <p className="text-sm text-slate-400">Analyzing compatibility...</p>
                   </div>
                 </div>
               ) : compat && (
-                <div className={`rounded-2xl border overflow-hidden ${compat.overallScore >= 70 ? 'border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-white' : compat.overallScore >= 40 ? 'border-sky-200 bg-gradient-to-br from-sky-50/50 to-white' : 'border-slate-200 bg-white'}`}>
+                <div className={`rounded-2xl border overflow-hidden ${compat.overallScore >= 70 ? 'border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-white' : compat.overallScore >= 40 ? 'border-[#8A7BF9]/30 bg-gradient-to-br from-[#8A7BF9]/10 to-white' : 'border-slate-200 bg-white'}`}>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8A7BF9] to-[#B4A3FD] flex items-center justify-center shadow-lg shadow-[#8A7BF9]/20">
                           <SparklesIcon className="h-5 w-5 text-white" />
                         </div>
                         <div>
@@ -385,7 +390,7 @@ function SeekerAccommodationDetail() {
                         {compat.insights.length > 3 && (
                           <button
                             onClick={() => setCompatExpanded(p => !p)}
-                            className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors pl-1"
+                            className="flex items-center gap-1 text-xs font-medium text-[#8A7BF9] hover:text-[#7A6BE9] transition-colors pl-1"
                           >
                             <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${compatExpanded ? 'rotate-180' : ''}`} />
                             {compatExpanded ? 'Show less' : `Show ${compat.insights.length - 3} more`}
@@ -403,7 +408,7 @@ function SeekerAccommodationDetail() {
                         <div className="space-y-2.5">
                           {compat.roommates.map((rm, i) => {
                             const s = rm.score
-                            const barColor = s >= 80 ? 'bg-emerald-500' : s >= 60 ? 'bg-sky-500' : s >= 40 ? 'bg-amber-500' : 'bg-red-500'
+                            const barColor = s >= 80 ? 'bg-emerald-500' : s >= 60 ? 'bg-[#8A7BF9]' : s >= 40 ? 'bg-amber-500' : 'bg-red-500'
                             return (
                               <div key={i} className="bg-white rounded-xl border border-slate-100 p-3.5">
                                 <div className="flex items-center justify-between mb-2">
@@ -466,7 +471,7 @@ function SeekerAccommodationDetail() {
                 </div>
                 <button
                   onClick={() => navigate(`/seeker/chat?host=${a.host?._id}&accommodation=${a._id}`)}
-                  className="mt-4 flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-colors shadow-lg shadow-sky-600/25"
+                  className="mt-4 flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] hover:opacity-95 rounded-xl transition-colors shadow-lg shadow-[#8A7BF9]/25"
                 >
                   <ChatBubbleLeftRightIcon className="h-4 w-4" /> Chat with Host
                 </button>
@@ -492,7 +497,7 @@ function SeekerAccommodationDetail() {
                     <p className="text-slate-400 text-xs mt-1">The host will review and confirm your booking.</p>
                     <button
                       onClick={() => navigate('/seeker/bookings')}
-                      className="mt-4 px-5 py-2 text-xs font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors"
+                      className="mt-4 px-5 py-2 text-xs font-medium text-[#8A7BF9] bg-[#8A7BF9]/10 hover:bg-[#8A7BF9]/20 rounded-lg transition-colors"
                     >
                       View My Bookings
                     </button>
@@ -512,7 +517,7 @@ function SeekerAccommodationDetail() {
                           value={bookingForm.checkIn}
                           onChange={e => setBookingForm(p => ({ ...p, checkIn: e.target.value }))}
                           disabled={bookingSubmitting}
-                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all disabled:opacity-50"
+                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all disabled:opacity-50"
                         />
                       </div>
                       <div>
@@ -524,7 +529,7 @@ function SeekerAccommodationDetail() {
                           value={bookingForm.checkOut}
                           onChange={e => setBookingForm(p => ({ ...p, checkOut: e.target.value }))}
                           disabled={bookingSubmitting}
-                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all disabled:opacity-50"
+                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -541,7 +546,7 @@ function SeekerAccommodationDetail() {
                       }`}>
                         {availabilityLoading ? (
                           <>
-                            <div className="w-4 h-4 border-2 border-slate-300 border-t-sky-500 rounded-full animate-spin flex-shrink-0" />
+                            <div className="w-4 h-4 border-2 border-slate-300 border-t-[#8A7BF9] rounded-full animate-spin flex-shrink-0" />
                             <span>Checking availability...</span>
                           </>
                         ) : dateAvailability?.available === 0 ? (
@@ -568,7 +573,7 @@ function SeekerAccommodationDetail() {
                         value={bookingForm.spaces}
                         onChange={e => setBookingForm(p => ({ ...p, spaces: e.target.value }))}
                         disabled={bookingSubmitting || dateAvailability?.available === 0}
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all disabled:opacity-50"
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all disabled:opacity-50"
                       />
                       <p className="text-[10px] text-slate-400 mt-1">
                         {dateAvailability
@@ -588,7 +593,7 @@ function SeekerAccommodationDetail() {
                                 key={i}
                                 className={`flex items-center justify-between px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
                                   isSelected
-                                    ? 'border-sky-300 bg-sky-50 ring-1 ring-sky-200'
+                                    ? 'border-[#8A7BF9]/50 bg-[#8A7BF9]/10 ring-1 ring-[#8A7BF9]/30'
                                     : 'border-slate-200 bg-white hover:border-slate-300'
                                 }`}
                               >
@@ -608,7 +613,7 @@ function SeekerAccommodationDetail() {
                                         }
                                       })
                                     }}
-                                    className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                    className="w-4 h-4 rounded border-slate-300 text-[#8A7BF9] focus:ring-[#8A7BF9]"
                                   />
                                   <span className="text-sm text-slate-700">{am.name}</span>
                                 </div>
@@ -620,31 +625,28 @@ function SeekerAccommodationDetail() {
                       </div>
                     )}
 
-                    {/* Price breakdown */}
+                    {/* Price breakdown: segment-based split among co-tenants for overlapping dates */}
                     {bookingForm.checkIn && bookingForm.checkOut && new Date(bookingForm.checkOut) > new Date(bookingForm.checkIn) && (() => {
-                      const msPerMonth = 1000 * 60 * 60 * 24 * 30
-                      const months = Math.max(1, Math.ceil((new Date(bookingForm.checkOut) - new Date(bookingForm.checkIn)) / msPerMonth))
-                      const amenitiesRate = bookingForm.selectedAmenities.reduce((s, am) => s + am.rate, 0)
+                      const days = Math.ceil((new Date(bookingForm.checkOut) - new Date(bookingForm.checkIn)) / (1000 * 60 * 60 * 24)) || 1
                       const sp = Number(bookingForm.spaces) || 1
-                      const baseTotal = a.price * months * sp
-                      const amenitiesTotal = amenitiesRate * months * sp
-                      const grandTotal = baseTotal + amenitiesTotal
+                      const booked = dateAvailability?.booked ?? 0
+                      const totalSpaces = booked + sp
+                      const est = dateAvailability?.estimatedPrice ?? null
                       return (
                         <div className="bg-slate-50 rounded-xl p-3.5 space-y-1.5 text-sm">
-                          <div className="flex justify-between text-slate-500">
-                            <span>Rent (₹{a.price?.toLocaleString()} x {months}mo x {sp})</span>
-                            <span>₹{baseTotal.toLocaleString()}</span>
-                          </div>
-                          {amenitiesTotal > 0 && (
-                            <div className="flex justify-between text-slate-500">
-                              <span>Amenities (₹{amenitiesRate.toLocaleString()} x {months}mo x {sp})</span>
-                              <span>₹{amenitiesTotal.toLocaleString()}</span>
-                            </div>
+                          <p className="text-slate-500 text-xs">
+                            Rent split among {totalSpaces} space{totalSpaces !== 1 ? 's' : ''} for overlapping dates · {days} days · ₹{a.price?.toLocaleString()}/mo
+                          </p>
+                          {bookingForm.selectedAmenities?.length > 0 && (
+                            <p className="text-slate-500 text-xs">+ Amenities (prorated)</p>
                           )}
-                          <div className="flex justify-between font-bold text-slate-900 pt-1.5 border-t border-slate-200">
-                            <span>Estimated Total</span>
-                            <span>₹{grandTotal.toLocaleString()}</span>
+                          <div className="flex justify-between items-center pt-1.5 border-t border-slate-200">
+                            <span className="font-bold text-slate-900">Estimated Total</span>
+                            <span className="font-bold text-slate-900">₹{(est ?? 0).toLocaleString()}</span>
                           </div>
+                          {availabilityLoading && (
+                            <p className="text-xs text-slate-400">Calculating...</p>
+                          )}
                         </div>
                       )
                     })()}
@@ -652,7 +654,7 @@ function SeekerAccommodationDetail() {
                     <button
                       type="submit"
                       disabled={bookingSubmitting || dateAvailability?.available === 0 || availabilityLoading}
-                      className="w-full py-3 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-colors disabled:opacity-50 shadow-lg shadow-sky-600/25"
+                      className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] hover:opacity-95 rounded-xl transition-colors disabled:opacity-50 shadow-lg shadow-[#8A7BF9]/25"
                     >
                       {bookingSubmitting ? 'Submitting...' : dateAvailability?.available === 0 ? 'No Spaces Available' : 'Request Booking'}
                     </button>

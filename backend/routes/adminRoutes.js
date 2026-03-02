@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const Accomodation = require('../models/accomodation');
 const Booking = require('../models/booking');
@@ -65,19 +66,23 @@ adminRoutes.get('/users/:id', adminAuth, async (req, res) => {
 // POST /api/admin/users - Create user
 adminRoutes.post('/users', adminAuth, async (req, res) => {
     try {
-        const { name, email, phone, address, dob, gender, occupation } = req.body;
+        const { name, email, phone, address, dob, gender, occupation, password } = req.body;
         if (!name || !email || !phone || !address || !dob || !gender) {
             return res.status(400).json({ error: 'Name, email, phone, address, dob and gender are required' });
         }
         if (occupation && !validOccupations.includes(occupation)) {
             return res.status(400).json({ error: 'Occupation must be Student, Employee, or Other' });
         }
-        const user = await User.create({
+        const payload = {
             name, email, phone, address,
             dob: new Date(dob),
             gender,
             occupation: occupation || 'Other'
-        });
+        };
+        if (password && password.length >= 6) {
+            payload.password = await bcrypt.hash(password, 10);
+        }
+        const user = await User.create(payload);
         res.status(201).json({ success: true, user });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -116,6 +121,27 @@ adminRoutes.delete('/users/:id', adminAuth, async (req, res) => {
         const user = await User.findByIdAndDelete(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json({ success: true, message: 'User deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT /api/admin/users/:id/password - Admin set/change user password
+adminRoutes.put('/users/:id/password', adminAuth, async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

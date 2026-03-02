@@ -24,10 +24,31 @@ function HostLoginPage() {
   const [registerLoading, setRegisterLoading] = useState(false)
   const [registerError, setRegisterError] = useState('')
   const [registerSuccess, setRegisterSuccess] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [regPhoneError, setRegPhoneError] = useState('')
+  const [regEmailError, setRegEmailError] = useState('')
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const handlePhoneChange = (val, setter, setError) => {
+    const digits = val.replace(/\D/g, '').slice(0, 10)
+    setter(digits)
+    setError(digits.length > 0 && digits.length !== 10 ? 'Phone must be 10 digits' : '')
+  }
+  const handleEmailBlur = (email, setError) => {
+    if (!email) setError('')
+    else setError(EMAIL_REGEX.test(email) ? '' : 'Enter a valid email address')
+  }
+  const validatePhone = (val) => /^\d{10}$/.test(val)
+  const validateEmail = (val) => EMAIL_REGEX.test(val)
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault()
     setLoginError('')
+    setPhoneError('')
+    if (!validatePhone(phone)) {
+      setPhoneError('Enter a valid 10-digit phone number')
+      return
+    }
     setLoginLoading(true)
     try {
       const { data } = await axios.post(`${API_BASE}/api/host/login`, { phone, otp })
@@ -50,6 +71,16 @@ function HostLoginPage() {
     e.preventDefault()
     setRegisterError('')
     setRegisterSuccess('')
+    setRegPhoneError('')
+    setRegEmailError('')
+    if (!validateEmail(hostEmail)) {
+      setRegEmailError('Enter a valid email address')
+      return
+    }
+    if (!validatePhone(hostPhone)) {
+      setRegPhoneError('Enter a valid 10-digit phone number')
+      return
+    }
     setRegisterLoading(true)
     try {
       const { data } = await axios.post(`${API_BASE}/api/host/register`, {
@@ -119,14 +150,17 @@ function HostLoginPage() {
                     <input
                       id="phone"
                       type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => handlePhoneChange(e.target.value, setPhone, setPhoneError)}
                       required
                       disabled={loginLoading}
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all duration-200 disabled:opacity-60 text-sm"
+                      className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all duration-200 disabled:opacity-60 text-sm ${phoneError ? 'border-red-300' : 'border-slate-200'}`}
                       placeholder="9876543210"
                     />
                   </div>
+                  {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
                 </div>
 
                 <div>
@@ -164,7 +198,7 @@ function HostLoginPage() {
                   New host?{' '}
                   <button
                     type="button"
-                    onClick={() => { setIsRegister(true); setLoginError(''); setRegisterError(''); setRegisterSuccess('') }}
+                    onClick={() => { setIsRegister(true); setLoginError(''); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
                     className="text-[#2363EB] font-semibold hover:underline"
                   >
                     Register here
@@ -215,24 +249,32 @@ function HostLoginPage() {
                   <input
                     type="email"
                     value={hostEmail}
-                    onChange={(e) => setHostEmail(e.target.value)}
+                    onChange={(e) => { setHostEmail(e.target.value); setRegEmailError('') }}
+                    onBlur={() => handleEmailBlur(hostEmail, setRegEmailError)}
                     required
                     disabled={registerLoading}
-                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all"
+                    className={`w-full px-4 py-3.5 rounded-xl border bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all ${regEmailError ? 'border-red-300' : 'border-slate-200'}`}
                     placeholder="john@example.com"
                   />
+                  {regEmailError && <p className="text-red-500 text-xs mt-1">{regEmailError}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Phone <span className="text-slate-400 font-normal">(used for login)</span></label>
-                  <input
-                    type="tel"
-                    value={hostPhone}
-                    onChange={(e) => setHostPhone(e.target.value)}
-                    required
-                    disabled={registerLoading}
-                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all"
-                    placeholder="9876543210"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">+91</span>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      value={hostPhone}
+                      onChange={(e) => handlePhoneChange(e.target.value, setHostPhone, setRegPhoneError)}
+                      required
+                      disabled={registerLoading}
+                      className={`w-full pl-12 pr-4 py-3.5 rounded-xl border bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all ${regPhoneError ? 'border-red-300' : 'border-slate-200'}`}
+                      placeholder="9876543210"
+                    />
+                  </div>
+                  {regPhoneError && <p className="text-red-500 text-xs mt-1">{regPhoneError}</p>}
                 </div>
               </div>
 
@@ -248,7 +290,7 @@ function HostLoginPage() {
                   Already registered?{' '}
                   <button
                     type="button"
-                    onClick={() => { setIsRegister(false); setRegisterError(''); setRegisterSuccess('') }}
+                    onClick={() => { setIsRegister(false); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
                     className="text-[#2363EB] font-medium hover:underline"
                   >
                     Login

@@ -13,6 +13,7 @@ function SeekerLoginPage() {
 
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
+  const [password, setPassword] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
 
@@ -23,23 +24,51 @@ function SeekerLoginPage() {
   const [regDob, setRegDob] = useState('')
   const [regGender, setRegGender] = useState('')
   const [regOccupation, setRegOccupation] = useState('Other')
+  const [regPassword, setRegPassword] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
   const [registerError, setRegisterError] = useState('')
   const [registerSuccess, setRegisterSuccess] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [regPhoneError, setRegPhoneError] = useState('')
+  const [regEmailError, setRegEmailError] = useState('')
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const handlePhoneChange = (val, setter, setError) => {
+    const digits = val.replace(/\D/g, '').slice(0, 10)
+    setter(digits)
+    setError(digits.length > 0 && digits.length !== 10 ? 'Phone must be 10 digits' : '')
+  }
+  const handleEmailBlur = (email, setError) => {
+    if (!email) setError('')
+    else setError(EMAIL_REGEX.test(email) ? '' : 'Enter a valid email address')
+  }
+  const validatePhone = (val) => /^\d{10}$/.test(val)
+  const validateEmail = (val) => EMAIL_REGEX.test(val)
 
   const switchTab = (toRegister) => {
     setIsRegister(toRegister)
     setLoginError('')
     setRegisterError('')
     setRegisterSuccess('')
+    setPhoneError('')
+    setRegPhoneError('')
+    setRegEmailError('')
+    setPassword('')
+    setRegPassword('')
   }
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault()
     setLoginError('')
+    setPhoneError('')
+    if (!validatePhone(phone)) {
+      setPhoneError('Enter a valid 10-digit phone number')
+      return
+    }
     setLoginLoading(true)
     try {
-      const { data } = await axios.post(`${API_BASE}/api/user/login`, { phone, otp })
+      const { data } = await axios.post(`${API_BASE}/api/user/login`, { phone, otp, password: password || undefined })
       if (data.success && data.token) {
         localStorage.setItem('seekerToken', data.token)
         navigate('/seeker/dashboard', { replace: true })
@@ -57,6 +86,20 @@ function SeekerLoginPage() {
     e.preventDefault()
     setRegisterError('')
     setRegisterSuccess('')
+    setRegPhoneError('')
+    setRegEmailError('')
+    if (!validateEmail(regEmail)) {
+      setRegEmailError('Enter a valid email address')
+      return
+    }
+    if (!validatePhone(regPhone)) {
+      setRegPhoneError('Enter a valid 10-digit phone number')
+      return
+    }
+    if (!regPassword || regPassword.length < 6) {
+      setRegisterError('Password must be at least 6 characters')
+      return
+    }
     setRegisterLoading(true)
     try {
       const { data } = await axios.post(`${API_BASE}/api/user/register`, {
@@ -67,9 +110,10 @@ function SeekerLoginPage() {
         dob: regDob,
         gender: regGender,
         occupation: regOccupation,
+        password: regPassword,
       })
       if (data.success) {
-        setRegisterSuccess('Registration successful! You can now login with your phone number and OTP 1234.')
+        setRegisterSuccess('Registration successful! You can now login with your phone number, OTP 1234, and password.')
         setRegName('')
         setRegEmail('')
         setRegPhone('')
@@ -77,6 +121,7 @@ function SeekerLoginPage() {
         setRegDob('')
         setRegGender('')
         setRegOccupation('Other')
+        setRegPassword('')
       } else {
         setRegisterError(data.error || 'Registration failed.')
       }
@@ -87,7 +132,7 @@ function SeekerLoginPage() {
     }
   }
 
-  const inputClass = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all duration-200 disabled:opacity-60 text-sm'
+  const inputClass = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all duration-200 disabled:opacity-60 text-sm'
 
   return (
     <div className="min-h-screen flex relative overflow-x-hidden">
@@ -117,7 +162,7 @@ function SeekerLoginPage() {
             <div className="w-full max-w-md mx-auto">
               <div className="mb-10">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-11 h-11 rounded-xl bg-sky-600 flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#8A7BF9] to-[#B4A3FD] flex items-center justify-center">
                     <UserIcon className="h-6 w-6 text-white" />
                   </div>
                   <span className="text-lg font-bold text-slate-900 tracking-tight">Room Pool</span>
@@ -141,14 +186,17 @@ function SeekerLoginPage() {
                     <input
                       id="phone"
                       type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => handlePhoneChange(e.target.value, setPhone, setPhoneError)}
                       required
                       disabled={loginLoading}
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all duration-200 disabled:opacity-60 text-sm"
+                      className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all duration-200 disabled:opacity-60 text-sm ${phoneError ? 'border-red-300' : 'border-slate-200'}`}
                       placeholder="9876543210"
                     />
                   </div>
+                  {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
                 </div>
 
                 <div>
@@ -161,16 +209,30 @@ function SeekerLoginPage() {
                     required
                     disabled={loginLoading}
                     maxLength={4}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all duration-200 disabled:opacity-60 text-sm tracking-widest"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all duration-200 disabled:opacity-60 text-sm tracking-widest"
                     placeholder="••••"
                   />
                   <p className="text-slate-400 text-xs mt-1.5">Use OTP <span className="font-mono font-medium text-slate-500">1234</span> for demo</p>
                 </div>
 
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loginLoading}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all duration-200 disabled:opacity-60 text-sm"
+                    placeholder="••••••"
+                  />
+                  <p className="text-slate-400 text-xs mt-1.5">Required if you set one during registration</p>
+                </div>
+
                 <button
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full py-3 px-4 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-sky-600/25 mt-2"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white font-semibold rounded-xl hover:opacity-95 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#8A7BF9]/25 mt-2"
                 >
                   {loginLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -187,7 +249,7 @@ function SeekerLoginPage() {
                   <button
                     type="button"
                     onClick={() => switchTab(true)}
-                    className="text-sky-600 font-semibold hover:underline"
+                    className="text-[#8A7BF9] font-semibold hover:underline"
                   >
                     Register here
                   </button>
@@ -197,21 +259,32 @@ function SeekerLoginPage() {
           </div>
         </>
       ) : (
-        /* Register view — full-width centered form */
-        <div className="w-full flex flex-col items-center justify-center p-8 bg-slate-100 min-h-screen overflow-y-auto">
-          <div className="w-full max-w-lg">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/10">
-                <UserIcon className="h-6 w-6 text-sky-600" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">Create Account</h1>
-                <p className="text-slate-500 text-sm">Sign up to find your perfect room</p>
-              </div>
-            </div>
+        /* Register view — same layout as login, scroll only on form side */
+        <div className="flex w-full min-h-screen overflow-hidden">
+          {/* Image panel — same as login */}
+          <div className="hidden lg:flex lg:w-2/5 flex-shrink-0 items-center justify-center h-screen overflow-hidden">
+            <img
+              src={seekerLoginImg}
+              alt="Seeker illustration"
+              className="h-full w-full object-cover drop-shadow-xl"
+            />
+          </div>
 
-            <form onSubmit={handleRegisterSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
-              <div className="p-8 md:p-12 space-y-5">
+          {/* Registration form panel — same width as login, scrolls only here */}
+          <div className="w-full lg:w-3/5 flex flex-col min-h-screen overflow-y-auto bg-slate-50">
+            <div className="flex flex-col justify-center flex-1 px-8 lg:px-20 py-8">
+              <div className="w-full max-w-md mx-auto">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#8A7BF9]/20 to-[#B4A3FD]/20">
+                  <UserIcon className="h-6 w-6 text-[#8A7BF9]" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-slate-900">Create Account</h1>
+                  <p className="text-slate-500 text-sm">Sign up to find your perfect room</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleRegisterSubmit} className="space-y-5">
                 {registerError && (
                   <div className="p-3.5 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm flex items-start gap-3" role="alert">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-200 flex items-center justify-center text-red-600 text-xs font-bold">!</span>
@@ -221,23 +294,49 @@ function SeekerLoginPage() {
 
                 <div>
                   <label htmlFor="reg-name" className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
-                  <input id="reg-name" type="text" value={regName} onChange={(e) => setRegName(e.target.value)} required disabled={registerLoading} className={inputClass} placeholder="John Doe" />
+                  <input id="reg-name" type="text" value={regName} onChange={(e) => setRegName(e.target.value)} required disabled={registerLoading} className={inputClass} placeholder="Enter your full name" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="reg-email" className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-                    <input id="reg-email" type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required disabled={registerLoading} className={inputClass} placeholder="john@example.com" />
+                    <input
+                      id="reg-email"
+                      type="email"
+                      value={regEmail}
+                      onChange={(e) => { setRegEmail(e.target.value); setRegEmailError('') }}
+                      onBlur={() => handleEmailBlur(regEmail, setRegEmailError)}
+                      required
+                      disabled={registerLoading}
+                      className={`${inputClass} ${regEmailError ? 'border-red-300' : ''}`}
+                      placeholder="Enter your email address"
+                    />
+                    {regEmailError && <p className="text-red-500 text-xs mt-1">{regEmailError}</p>}
                   </div>
                   <div>
                     <label htmlFor="reg-phone" className="block text-sm font-medium text-slate-700 mb-1.5">Phone <span className="text-slate-400 font-normal">(login)</span></label>
-                    <input id="reg-phone" type="tel" value={regPhone} onChange={(e) => setRegPhone(e.target.value)} required disabled={registerLoading} className={inputClass} placeholder="9876543210" />
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">+91</span>
+                      <input
+                        id="reg-phone"
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        value={regPhone}
+                        onChange={(e) => handlePhoneChange(e.target.value, setRegPhone, setRegPhoneError)}
+                        required
+                        disabled={registerLoading}
+                        className={`${inputClass} pl-12 ${regPhoneError ? 'border-red-300' : ''}`}
+                        placeholder="10-digit mobile number"
+                      />
+                    </div>
+                    {regPhoneError && <p className="text-red-500 text-xs mt-1">{regPhoneError}</p>}
                   </div>
                 </div>
 
                 <div>
                   <label htmlFor="reg-address" className="block text-sm font-medium text-slate-700 mb-1.5">Address</label>
-                  <input id="reg-address" type="text" value={regAddress} onChange={(e) => setRegAddress(e.target.value)} required disabled={registerLoading} className={inputClass} placeholder="Street, locality, city" />
+                  <input id="reg-address" type="text" value={regAddress} onChange={(e) => setRegAddress(e.target.value)} required disabled={registerLoading} className={inputClass} placeholder="Enter your full address" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -264,13 +363,27 @@ function SeekerLoginPage() {
                     <option value="Other">Other</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="px-8 md:px-12 py-6 bg-slate-50/80 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <label htmlFor="reg-password" className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                  <input
+                    id="reg-password"
+                    type="password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    required
+                    disabled={registerLoading}
+                    minLength={6}
+                    className={inputClass}
+                    placeholder="At least 6 characters"
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
                 <button
                   type="submit"
                   disabled={registerLoading}
-                  className="w-full sm:w-auto px-8 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-sky-600/25"
+                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white font-semibold rounded-xl hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#8A7BF9]/25"
                 >
                   {registerLoading ? (
                     <span className="flex items-center gap-2">
@@ -284,13 +397,15 @@ function SeekerLoginPage() {
                   <button
                     type="button"
                     onClick={() => switchTab(false)}
-                    className="text-sky-600 font-semibold hover:underline"
+                    className="text-[#8A7BF9] font-semibold hover:underline"
                   >
                     Login
                   </button>
                 </p>
               </div>
             </form>
+              </div>
+            </div>
           </div>
         </div>
       )}

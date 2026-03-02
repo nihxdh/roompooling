@@ -1,11 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const Accomodation = require('../models/accomodation');
 const Booking = require('../models/booking');
 const Conversation = require('../models/conversation');
 const Message = require('../models/message');
 const userAuth = require('../middleware/userAuth');
+const { calculateBookingPrice } = require('../utils/bookingPricing');
 const userRoutes = express.Router();
 
 const STATIC_OTP = '1234';
@@ -291,10 +293,13 @@ async function getAccommodationRoommates(accommodationId) {
 // POST /api/user/register
 userRoutes.post('/register', async (req, res) => {
     try {
-        const { name, email, phone, address, dob, gender, occupation } = req.body;
+        const { name, email, phone, address, dob, gender, occupation, password } = req.body;
 
         if (!name || !email || !phone || !address || !dob || !gender) {
             return res.status(400).json({ error: 'Name, email, phone, address, dob and gender are required' });
+        }
+        if (!password || password.length < 6) {
+            return res.status(400).json({ error: 'Password is required and must be at least 6 characters' });
         }
 
         const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
@@ -303,6 +308,8 @@ userRoutes.post('/register', async (req, res) => {
             return res.status(400).json({ error: `${field} already registered` });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = await User.create({
             name,
             email,
@@ -310,7 +317,8 @@ userRoutes.post('/register', async (req, res) => {
             address,
             dob: new Date(dob),
             gender,
-            occupation: occupation || 'Other'
+            occupation: occupation || 'Other',
+            password: hashedPassword
         });
 
         res.status(201).json({
@@ -326,19 +334,29 @@ userRoutes.post('/register', async (req, res) => {
 // POST /api/user/login
 userRoutes.post('/login', async (req, res) => {
     try {
-        const { phone, otp } = req.body;
+        const { phone, otp, password } = req.body;
 
         if (!phone || !otp) {
             return res.status(400).json({ error: 'Phone number and OTP are required' });
         }
 
-        const user = await User.findOne({ phone });
+        const user = await User.findOne({ phone }).select('+password');
         if (!user) {
             return res.status(404).json({ error: 'Phone number not registered. Please register first.' });
         }
 
         if (otp !== STATIC_OTP) {
             return res.status(401).json({ error: 'Invalid OTP' });
+        }
+
+        if (user.password) {
+            if (!password) {
+                return res.status(400).json({ error: 'Password is required for login' });
+            }
+            const match = await bcrypt.compare(password, user.password);
+            if (!match) {
+                return res.status(401).json({ error: 'Invalid password' });
+            }
         }
 
         const token = jwt.sign(
@@ -425,7 +443,7 @@ userRoutes.get('/accommodations/:id', userAuth, async (req, res) => {
 // GET /api/user/accommodations/:id/availability - Check date-specific availability
 userRoutes.get('/accommodations/:id/availability', userAuth, async (req, res) => {
     try {
-        const { checkIn, checkOut } = req.query;
+        const { checkIn, checkOut, spaces, selectedAmenities } = req.query;
         if (!checkIn || !checkOut) {
             return res.status(400).json({ error: 'checkIn and checkOut query params are required' });
         }
@@ -441,7 +459,32 @@ userRoutes.get('/accommodations/:id/availability', userAuth, async (req, res) =>
             return res.status(404).json({ error: 'Accommodation not found' });
         }
 
-        res.json({ success: true, ...result });
+        const out = { success: true, ...result };
+
+        // If spaces/amenities provided, include segment-based price estimate
+        const sp = Math.max(1, parseInt(spaces, 10) || 1);
+        let amenitiesList = [];
+        try {
+            amenitiesList = selectedAmenities ? JSON.parse(selectedAmenities) : [];
+        } catch {}
+        if (Array.isArray(amenitiesList) && amenitiesList.length >= 0) {
+            const accommodation = await Accomodation.findById(req.params.id);
+            if (accommodation) {
+                const validAmenities = amenitiesList.filter(s => s && s.name && s.rate != null);
+                const accMap = new Map((accommodation.amenities || []).map(am => [am.name, am.rate]));
+                const valid = validAmenities.filter(s => accMap.has(s.name)).map(s => ({ name: s.name, rate: accMap.get(s.name) }));
+                const overlappingConfirmed = await Booking.find({
+                    accommodation: req.params.id,
+                    status: 'confirmed',
+                    checkIn: { $lt: checkOutDate },
+                    checkOut: { $gt: checkInDate }
+                }).lean();
+                const mockBooking = { checkIn: checkInDate, checkOut: checkOutDate, spaces: sp, selectedAmenities: valid };
+                out.estimatedPrice = calculateBookingPrice(mockBooking, overlappingConfirmed, accommodation, { includeSelf: true });
+            }
+        }
+
+        res.json(out);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -534,6 +577,37 @@ userRoutes.put('/profile', userAuth, async (req, res) => {
         const user = await User.findByIdAndUpdate(req.user.userId, updates, { new: true });
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT /api/user/password - Change own password
+userRoutes.put('/password', userAuth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters' });
+        }
+
+        const user = await User.findById(req.user.userId).select('+password');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        if (user.password) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Current password is required to change password' });
+            }
+            const match = await bcrypt.compare(currentPassword, user.password);
+            if (!match) {
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -659,10 +733,20 @@ userRoutes.post('/bookings', userAuth, async (req, res) => {
 
         const amenitiesTotal = validAmenities.reduce((sum, am) => sum + am.rate, 0);
 
-        // Price = (accommodation price + selected amenities) * months * spaces
-        const msPerMonth = 1000 * 60 * 60 * 24 * 30;
-        const months = Math.max(1, Math.ceil((checkOutDate - checkInDate) / msPerMonth));
-        const totalPrice = (accommodation.price + amenitiesTotal) * months * requestedSpaces;
+        // Segment-based pricing: rent split among co-tenants for overlapping dates
+        const overlappingConfirmed = await Booking.find({
+            accommodation: accommodationId,
+            status: 'confirmed',
+            checkIn: { $lt: checkOutDate },
+            checkOut: { $gt: checkInDate }
+        }).lean();
+        const newBooking = {
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            spaces: requestedSpaces,
+            selectedAmenities: validAmenities
+        };
+        const totalPrice = calculateBookingPrice(newBooking, overlappingConfirmed, accommodation, { includeSelf: true });
 
         const booking = await Booking.create({
             user: req.user.userId,
@@ -723,23 +807,39 @@ userRoutes.put('/bookings/:id/cancel', userAuth, async (req, res) => {
             return res.status(400).json({ error: 'Only pending or confirmed bookings can be cancelled' });
         }
 
+        const wasConfirmed = booking.status === 'confirmed';
         booking.status = 'cancelled';
         await booking.save();
 
-        // Recalculate the static available_space indicator
-        if (booking.status === 'cancelled') {
+        if (wasConfirmed) {
             const accommodation = await Accomodation.findById(booking.accommodation);
             if (accommodation) {
+                // Recalculate totalPrice for remaining overlapping confirmed bookings (they now split among fewer)
+                const overlappingConfirmed = await Booking.find({
+                    accommodation: booking.accommodation,
+                    status: 'confirmed',
+                    checkIn: { $lt: booking.checkOut },
+                    checkOut: { $gt: booking.checkIn }
+                });
+                for (const b of overlappingConfirmed) {
+                    const newPrice = calculateBookingPrice(
+                        { checkIn: b.checkIn, checkOut: b.checkOut, spaces: b.spaces, selectedAmenities: b.selectedAmenities || [] },
+                        overlappingConfirmed,
+                        accommodation,
+                        { includeSelf: false }
+                    );
+                    b.totalPrice = newPrice;
+                    await b.save();
+                }
                 const now = new Date();
                 const farFuture = new Date('2099-12-31');
-                const confirmedOverlap = await Booking.find({
+                const allConfirmed = await Booking.find({
                     accommodation: booking.accommodation,
                     status: 'confirmed',
                     checkIn: { $lt: farFuture },
                     checkOut: { $gt: now }
                 });
-                const bookedSpaces = confirmedOverlap.reduce((sum, b) => sum + b.spaces, 0);
-                accommodation.roomspace.available_space = Math.max(0, accommodation.roomspace.total_space - bookedSpaces);
+                accommodation.roomspace.available_space = Math.max(0, accommodation.roomspace.total_space - allConfirmed.reduce((s, b) => s + b.spaces, 0));
                 await accommodation.save();
             }
         }

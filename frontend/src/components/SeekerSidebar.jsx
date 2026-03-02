@@ -30,7 +30,7 @@ function SeekerSidebar({ mobileOpen, setMobileOpen }) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-6 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-sky-600 flex items-center justify-center">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8A7BF9] to-[#B4A3FD] flex items-center justify-center">
           <MagnifyingGlassIcon className="h-5 w-5 text-white" />
         </div>
         <div>
@@ -49,7 +49,7 @@ function SeekerSidebar({ mobileOpen, setMobileOpen }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-sky-50 text-sky-700'
+                  ? 'bg-[#8A7BF9]/10 text-[#8A7BF9]'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
               }`
             }

@@ -14,6 +14,7 @@ import {
   UserIcon,
   SparklesIcon,
   XMarkIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline'
 import SeekerSidebar from '../components/SeekerSidebar'
 import SuccessModal from '../components/SuccessModal'
@@ -41,6 +42,13 @@ function SeekerProfile() {
   const [prefsSaving, setPrefsSaving] = useState(false)
   const [prefsError, setPrefsError] = useState('')
   const [langInput, setLangInput] = useState('')
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
 
   const api = useCallback(() => axios.create({
     baseURL: API_BASE,
@@ -184,8 +192,45 @@ function SeekerProfile() {
 
   const updateField = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
 
-  const inputEdit = 'w-full px-5 py-4 rounded-2xl border border-blue-200 bg-white text-base text-slate-900 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200'
-  const inputRead = 'w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 text-base text-slate-800 cursor-default font-medium'
+  const handleChangePassword = async (e) => {
+    e.preventDefault()
+    setPasswordError('')
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match')
+      return
+    }
+    setPasswordSaving(true)
+    try {
+      await api().put('/api/user/password', {
+        currentPassword: currentPassword || undefined,
+        newPassword,
+      })
+      setSuccessMsg('Password updated successfully!')
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setShowPasswordForm(false)
+    } catch (err) {
+      setPasswordError(err.response?.data?.error || 'Failed to update password')
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  const openPasswordForm = () => {
+    setShowPasswordForm(true)
+    setPasswordError('')
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
+  }
+
+  const inputEdit = 'w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all'
+  const inputRead = 'w-full px-3 py-2.5 rounded-xl border border-slate-100 bg-slate-50/80 text-sm text-slate-800 cursor-default font-medium'
 
   const getInitials = (name) => {
     if (!name) return '?'
@@ -198,39 +243,39 @@ function SeekerProfile() {
       <SuccessModal message={successMsg} onClose={() => setSuccessMsg('')} />
 
       <div className="lg:pl-64">
-        <main className="px-6 lg:px-12 py-12 max-w-3xl mx-auto">
+        <main className="px-4 lg:px-8 py-8 max-w-2xl mx-auto">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-32 text-slate-400">
-              <div className="w-12 h-12 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin mb-5" />
-              <p className="text-base font-medium">Loading profile...</p>
+            <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+              <div className="w-9 h-9 border-2 border-slate-200 border-t-[#8A7BF9] rounded-full animate-spin mb-3" />
+              <p className="text-sm font-medium">Loading profile...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-32 text-red-500">{error}</div>
+            <div className="text-center py-24 text-red-500 text-sm">{error}</div>
           ) : profile ? (
-            <div className="space-y-10">
+            <div className="space-y-6">
               {saveError && (
-                <div className="p-5 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-base flex items-center gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-sm font-bold">!</span>
+                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-xs font-bold">!</span>
                   {saveError}
                 </div>
               )}
 
               {/* Profile hero */}
-              <div className="bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 rounded-3xl p-8 lg:p-10 shadow-xl shadow-blue-600/20">
-                <div className="flex items-center gap-6 pl-10 lg:pl-0">
-                  <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/20">
-                    <span className="text-2xl font-bold text-white">{getInitials(profile.name)}</span>
+              <div className="bg-gradient-to-br from-[#8A7BF9] to-[#B4A3FD] rounded-2xl p-5 lg:p-6 shadow-lg shadow-[#8A7BF9]/20">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/30">
+                    <span className="text-lg font-bold text-white">{getInitials(profile.name)}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-2xl font-bold text-white truncate">{profile.name}</h1>
-                    <p className="text-blue-100 mt-1">{profile.email}</p>
-                    <div className="flex flex-wrap gap-4 mt-3">
-                      <span className="flex items-center gap-1.5 text-sm text-blue-200">
-                        <BriefcaseIcon className="h-4 w-4" />
+                    <h1 className="text-lg font-bold text-white truncate">{profile.name}</h1>
+                    <p className="text-white/80 text-sm mt-0.5">{profile.email}</p>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      <span className="flex items-center gap-1 text-xs text-white/90">
+                        <BriefcaseIcon className="h-3.5 w-3.5" />
                         {profile.occupation || 'Other'}
                       </span>
-                      <span className="flex items-center gap-1.5 text-sm text-blue-200">
-                        <CalendarDaysIcon className="h-4 w-4" />
+                      <span className="flex items-center gap-1 text-xs text-white/90">
+                        <CalendarDaysIcon className="h-3.5 w-3.5" />
                         Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                       </span>
                     </div>
@@ -238,9 +283,9 @@ function SeekerProfile() {
                   {!editing && (
                     <button
                       onClick={() => setEditing(true)}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 text-white text-sm font-semibold hover:bg-white/25 transition-all flex-shrink-0"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white/20 border border-white/30 text-white text-xs font-semibold hover:bg-white/30 transition-all flex-shrink-0"
                     >
-                      <PencilSquareIcon className="h-4 w-4" />
+                      <PencilSquareIcon className="h-3.5 w-3.5" />
                       Edit
                     </button>
                   )}
@@ -248,24 +293,24 @@ function SeekerProfile() {
               </div>
 
               {/* Fields card */}
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm">
-                <div className="p-8 lg:p-10 space-y-7">
-                  <h2 className="text-lg font-bold text-slate-900">Personal Information</h2>
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                <div className="p-5 lg:p-6 space-y-4">
+                  <h2 className="text-sm font-bold text-slate-900">Personal Information</h2>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <UserIcon className="h-4 w-4 text-blue-600" />
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                          <UserIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                         </div>
                         Full Name
                       </label>
                       <input type="text" value={form.name} onChange={(e) => updateField('name', e.target.value)} readOnly={!editing} className={editing ? inputEdit : inputRead} />
                     </div>
                     <div>
-                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <EnvelopeIcon className="h-4 w-4 text-blue-600" />
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                          <EnvelopeIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                         </div>
                         Email
                       </label>
@@ -273,20 +318,20 @@ function SeekerProfile() {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <PhoneIcon className="h-4 w-4 text-blue-600" />
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                          <PhoneIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                         </div>
                         Phone
                       </label>
                       <input type="tel" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} readOnly={!editing} className={editing ? inputEdit : inputRead} />
                     </div>
                     <div>
-                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <CalendarDaysIcon className="h-4 w-4 text-blue-600" />
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                          <CalendarDaysIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                         </div>
                         Date of Birth
                       </label>
@@ -301,20 +346,20 @@ function SeekerProfile() {
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                      <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                        <MapPinIcon className="h-4 w-4 text-blue-600" />
+                    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                        <MapPinIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                       </div>
                       Address
                     </label>
                     <input type="text" value={form.address} onChange={(e) => updateField('address', e.target.value)} readOnly={!editing} className={editing ? inputEdit : inputRead} />
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <UserCircleIcon className="h-4 w-4 text-blue-600" />
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                          <UserCircleIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                         </div>
                         Gender
                       </label>
@@ -330,9 +375,9 @@ function SeekerProfile() {
                       )}
                     </div>
                     <div>
-                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-3">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <BriefcaseIcon className="h-4 w-4 text-blue-600" />
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                          <BriefcaseIcon className="h-3.5 w-3.5 text-[#8A7BF9]" />
                         </div>
                         Occupation
                       </label>
@@ -350,27 +395,27 @@ function SeekerProfile() {
                 </div>
 
                 {editing && (
-                  <div className="px-8 lg:px-10 py-5 border-t border-slate-100 bg-slate-50/50 rounded-b-3xl flex items-center justify-end gap-3">
+                  <div className="px-5 lg:px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex items-center justify-end gap-2">
                     <button
                       onClick={handleCancel}
-                      className="px-6 py-3 rounded-xl text-base font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
                     >
                       Discard
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center gap-2 px-7 py-3 rounded-xl bg-blue-600 text-white text-base font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-blue-600/25"
+                      className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md shadow-[#8A7BF9]/25"
                     >
                       {saving ? (
                         <>
-                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           Saving...
                         </>
                       ) : (
                         <>
-                          <CheckIcon className="h-5 w-5" />
-                          Save Changes
+                          <CheckIcon className="h-4 w-4" />
+                          Save
                         </>
                       )}
                     </button>
@@ -379,60 +424,60 @@ function SeekerProfile() {
               </div>
 
               {/* Lifestyle Preferences */}
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-8 lg:p-10">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                        <SparklesIcon className="h-5 w-5 text-white" />
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div className="p-5 lg:p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#8A7BF9] to-[#B4A3FD] flex items-center justify-center shadow-md shadow-[#8A7BF9]/20">
+                        <SparklesIcon className="h-4 w-4 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold text-slate-900">Lifestyle Preferences</h2>
-                        <p className="text-sm text-slate-400">Help us find your perfect roommate match</p>
+                        <h2 className="text-sm font-bold text-slate-900">Lifestyle Preferences</h2>
+                        <p className="text-xs text-slate-400">Find your perfect roommate match</p>
                       </div>
                     </div>
                     {!prefsEditing ? (
                       <button
                         onClick={() => { setPrefsEditing(true); setPrefsForm({ ...prefs }) }}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 text-violet-600 text-sm font-semibold hover:bg-violet-100 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8A7BF9]/10 text-[#8A7BF9] text-xs font-semibold hover:bg-[#8A7BF9]/20 transition-colors"
                       >
-                        <PencilSquareIcon className="h-4 w-4" />
+                        <PencilSquareIcon className="h-3.5 w-3.5" />
                         {Object.keys(prefs).filter(k => prefs[k] !== undefined && prefs[k] !== null && !(Array.isArray(prefs[k]) && prefs[k].length === 0)).length > 0 ? 'Edit' : 'Set Up'}
                       </button>
                     ) : null}
                   </div>
 
                   {prefsError && (
-                    <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">{prefsError}</div>
+                    <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs">{prefsError}</div>
                   )}
 
                   {!prefsEditing ? (
                     Object.keys(prefs).filter(k => prefs[k] !== undefined && prefs[k] !== null && !(Array.isArray(prefs[k]) && prefs[k].length === 0)).length === 0 ? (
-                      <div className="text-center py-10">
-                        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                          <SparklesIcon className="h-8 w-8 text-slate-300" />
+                      <div className="text-center py-8">
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                          <SparklesIcon className="h-6 w-6 text-slate-300" />
                         </div>
-                        <p className="text-slate-400 text-base">No preferences set yet</p>
-                        <p className="text-slate-300 text-sm mt-1">Set up your lifestyle preferences to get smart roommate suggestions</p>
+                        <p className="text-slate-400 text-sm">No preferences set yet</p>
+                        <p className="text-slate-300 text-xs mt-1">Set up preferences for smart roommate suggestions</p>
                       </div>
                     ) : (
-                      <div className="space-y-5">
+                      <div className="space-y-3">
                         {Object.entries(PREF_OPTIONS).map(([key, { label }]) => {
                           const val = prefs[key]
                           if (!val) return null
                           return (
-                            <div key={key} className="flex items-center justify-between py-2">
-                              <span className="text-sm font-medium text-slate-500">{label}</span>
-                              <span className="px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 text-sm font-semibold">{val}</span>
+                            <div key={key} className="flex items-center justify-between py-1.5">
+                              <span className="text-xs font-medium text-slate-500">{label}</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-[#8A7BF9]/10 text-[#8A7BF9] text-xs font-semibold">{val}</span>
                             </div>
                           )
                         })}
                         {prefs.languages?.length > 0 && (
-                          <div className="pt-2">
-                            <span className="text-sm font-medium text-slate-500">Languages</span>
-                            <div className="flex flex-wrap gap-2 mt-2">
+                          <div className="pt-1.5">
+                            <span className="text-xs font-medium text-slate-500">Languages</span>
+                            <div className="flex flex-wrap gap-1.5 mt-1.5">
                               {prefs.languages.map(l => (
-                                <span key={l} className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-sm font-medium">{l}</span>
+                                <span key={l} className="px-2.5 py-1 rounded-lg bg-[#8A7BF9]/10 text-[#8A7BF9] text-xs font-medium">{l}</span>
                               ))}
                             </div>
                           </div>
@@ -440,20 +485,20 @@ function SeekerProfile() {
                       </div>
                     )
                   ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {Object.entries(PREF_OPTIONS).map(([key, { label, options }]) => (
                         <div key={key}>
-                          <label className="text-sm font-semibold text-slate-600 mb-2.5 block">{label}</label>
-                          <div className="flex flex-wrap gap-2">
+                          <label className="text-xs font-semibold text-slate-600 mb-2 block">{label}</label>
+                          <div className="flex flex-wrap gap-1.5">
                             {options.map(opt => (
                               <button
                                 key={opt}
                                 type="button"
                                 onClick={() => setPrefsForm(p => ({ ...p, [key]: p[key] === opt ? undefined : opt }))}
-                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
                                   prefsForm[key] === opt
-                                    ? 'bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-600/25'
-                                    : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300 hover:text-violet-600'
+                                    ? 'bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white border-transparent shadow-sm shadow-[#8A7BF9]/25'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:border-[#8A7BF9]/50 hover:text-[#8A7BF9]'
                                 }`}
                               >
                                 {opt}
@@ -464,24 +509,24 @@ function SeekerProfile() {
                       ))}
 
                       <div>
-                        <label className="text-sm font-semibold text-slate-600 mb-2.5 block">Languages</label>
-                        <div className="flex gap-2 mb-3">
+                        <label className="text-xs font-semibold text-slate-600 mb-2 block">Languages</label>
+                        <div className="flex gap-2 mb-2">
                           <input
                             type="text"
                             value={langInput}
                             onChange={e => setLangInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addLanguage())}
-                            placeholder="Type a language and press Enter"
-                            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 outline-none"
+                            placeholder="Type and press Enter"
+                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none"
                           />
-                          <button type="button" onClick={addLanguage} className="px-4 py-2.5 rounded-xl bg-violet-100 text-violet-700 text-sm font-semibold hover:bg-violet-200 transition-colors">Add</button>
+                          <button type="button" onClick={addLanguage} className="px-3 py-2 rounded-lg bg-[#8A7BF9]/10 text-[#8A7BF9] text-xs font-semibold hover:bg-[#8A7BF9]/20 transition-colors">Add</button>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5">
                           {(prefsForm.languages || []).map(l => (
-                            <span key={l} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-sm font-medium">
+                            <span key={l} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#8A7BF9]/10 text-[#8A7BF9] text-xs font-medium">
                               {l}
                               <button type="button" onClick={() => removeLanguage(l)} className="hover:text-red-500 transition-colors">
-                                <XMarkIcon className="h-3.5 w-3.5" />
+                                <XMarkIcon className="h-3 w-3" />
                               </button>
                             </span>
                           ))}
@@ -492,27 +537,27 @@ function SeekerProfile() {
                 </div>
 
                 {prefsEditing && (
-                  <div className="px-8 lg:px-10 py-5 border-t border-slate-100 bg-slate-50/50 rounded-b-3xl flex items-center justify-end gap-3">
+                  <div className="px-5 lg:px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex items-center justify-end gap-2">
                     <button
                       onClick={() => { setPrefsEditing(false); setPrefsForm({ ...prefs }); setPrefsError('') }}
-                      className="px-6 py-3 rounded-xl text-base font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
                     >
                       Discard
                     </button>
                     <button
                       onClick={savePreferences}
                       disabled={prefsSaving}
-                      className="flex items-center gap-2 px-7 py-3 rounded-xl bg-violet-600 text-white text-base font-semibold hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-violet-600/25"
+                      className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md shadow-[#8A7BF9]/25"
                     >
                       {prefsSaving ? (
                         <>
-                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           Saving...
                         </>
                       ) : (
                         <>
-                          <CheckIcon className="h-5 w-5" />
-                          Save Preferences
+                          <CheckIcon className="h-4 w-4" />
+                          Save
                         </>
                       )}
                     </button>
@@ -520,29 +565,123 @@ function SeekerProfile() {
                 )}
               </div>
 
+              {/* Change Password */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div className="p-5 lg:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-[#8A7BF9]/10 flex items-center justify-center">
+                        <KeyIcon className="h-4 w-4 text-[#8A7BF9]" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-bold text-slate-900">Password</h2>
+                        <p className="text-xs text-slate-400">Manage your account password</p>
+                      </div>
+                    </div>
+                    {!showPasswordForm && (
+                      <button
+                        onClick={openPasswordForm}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8A7BF9]/10 text-[#8A7BF9] text-xs font-semibold hover:bg-[#8A7BF9]/20 transition-colors"
+                      >
+                        <KeyIcon className="h-3.5 w-3.5" />
+                        Change
+                      </button>
+                    )}
+                  </div>
+
+                  {showPasswordForm && (
+                    <form onSubmit={handleChangePassword} className="space-y-3">
+                      {passwordError && (
+                        <div className="p-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs">{passwordError}</div>
+                      )}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Current Password</label>
+                        <input
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none"
+                          placeholder="Leave blank if never set"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">New Password</label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none"
+                          placeholder="Min 6 characters"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Confirm</label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none"
+                          placeholder="Re-enter new password"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => { setShowPasswordForm(false); setPasswordError('') }}
+                          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={passwordSaving}
+                          className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-gradient-to-r from-[#8A7BF9] to-[#B4A3FD] text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md shadow-[#8A7BF9]/25"
+                        >
+                          {passwordSaving ? (
+                            <>
+                              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Updating...
+                            </>
+                          ) : (
+                            <>
+                              <CheckIcon className="h-4 w-4" />
+                              Update
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
+
               {/* Delete */}
-              <div className="flex items-center justify-between p-6 rounded-2xl border border-dashed border-slate-200 bg-white/50">
-                <p className="text-base text-slate-500">Permanently delete your account</p>
+              <div className="flex items-center justify-between p-4 rounded-xl border border-dashed border-slate-200 bg-white/80">
+                <p className="text-sm text-slate-500">Permanently delete your account</p>
                 {!showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-medium text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon className="h-4 w-4" />
                     Delete
                   </button>
                 ) : (
-                  <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="px-4 py-2.5 rounded-xl text-slate-500 text-base font-medium hover:bg-slate-100 transition-colors"
+                      className="px-3 py-2 rounded-lg text-slate-500 text-sm font-medium hover:bg-slate-100 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleDelete}
                       disabled={deleting}
-                      className="px-5 py-2.5 rounded-xl bg-red-600 text-white text-base font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                      className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
                     >
                       {deleting ? 'Deleting...' : 'Confirm'}
                     </button>

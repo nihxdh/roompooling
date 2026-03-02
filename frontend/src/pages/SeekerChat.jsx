@@ -88,7 +88,7 @@ function SeekerChat() {
         {/* Header */}
         <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-6 lg:px-10 py-4">
           <div className="flex items-center gap-3 pl-10 lg:pl-0">
-            <ChatBubbleLeftRightIcon className="h-5 w-5 text-sky-600" />
+            <ChatBubbleLeftRightIcon className="h-5 w-5 text-[#8A7BF9]" />
             <h1 className="text-lg font-bold text-slate-900">Messages</h1>
           </div>
         </header>
@@ -99,7 +99,7 @@ function SeekerChat() {
           <div className={`${activeConv && !showList ? 'hidden md:flex' : 'flex'} w-full md:w-80 flex-col border-r border-slate-200 bg-white`}>
             {loading ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-slate-200 border-t-sky-600 rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-slate-200 border-t-[#8A7BF9] rounded-full animate-spin" />
               </div>
             ) : conversations.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-slate-400 px-6 text-center">
@@ -116,7 +116,7 @@ function SeekerChat() {
                       key={c._id}
                       onClick={() => handleSelectConv(c)}
                       className={`w-full px-4 py-3.5 flex gap-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 ${
-                        isActive ? 'bg-sky-50 border-l-2 border-l-sky-500' : ''
+                        isActive ? 'bg-[#8A7BF9]/10 border-l-2 border-l-[#8A7BF9]' : ''
                       }`}
                     >
                       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
