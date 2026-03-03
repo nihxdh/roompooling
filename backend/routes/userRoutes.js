@@ -517,7 +517,13 @@ userRoutes.get('/accommodations/:id/compatibility', userAuth, async (req, res) =
 
         const roommateDetails = roommates.map(r => {
             const { score, matchingTraits, conflictingTraits } = computePairwiseScore(seeker, r);
-            return { score, matchingTraits, conflictingTraits };
+            return {
+                name: r.name,
+                occupation: r.occupation,
+                score,
+                matchingTraits,
+                conflictingTraits
+            };
         });
 
         let roommateScore = 0;

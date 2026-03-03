@@ -134,7 +134,7 @@ function HostDashboard() {
             <h1 className="text-lg font-bold text-slate-900">Accommodations</h1>
             <p className="text-xs text-slate-400 mt-0.5">Manage your property listings</p>
           </div>
-          <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#2363EB] hover:bg-[#1b50c7] rounded-xl transition-colors shadow-md shadow-[#2363EB]/20">
+          <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#595AFD] hover:bg-[#4B4CE6] rounded-xl transition-colors shadow-md shadow-[#595AFD]/20">
             <PlusIcon className="h-3.5 w-3.5" /> New Listing
           </button>
         </div>
@@ -143,7 +143,7 @@ function HostDashboard() {
         <div className="px-6 py-6 md:px-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-28 text-slate-400">
-              <div className="w-8 h-8 border-2 border-slate-200 border-t-[#2363EB] rounded-full animate-spin mb-4" />
+              <div className="w-8 h-8 border-2 border-slate-200 border-t-[#595AFD] rounded-full animate-spin mb-4" />
               <p className="text-sm font-medium">Loading accommodations...</p>
             </div>
           ) : error ? (
@@ -158,7 +158,7 @@ function HostDashboard() {
               </div>
               <p className="text-lg font-semibold text-slate-600 mb-1">No accommodations yet</p>
               <p className="text-sm text-slate-400 mb-6">Create your first listing to get started.</p>
-              <button onClick={openCreate} className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#2363EB] hover:bg-[#1b50c7] rounded-xl transition-colors shadow-lg shadow-[#2363EB]/20">
+              <button onClick={openCreate} className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#595AFD] hover:bg-[#4B4CE6] rounded-xl transition-colors shadow-lg shadow-[#595AFD]/20">
                 <PlusIcon className="h-4 w-4" /> Add Accommodation
               </button>
             </div>
@@ -170,7 +170,7 @@ function HostDashboard() {
                 const thumb = a.images?.[0] ? `${imageBase}${a.images[0]}` : null
                 return (
                   <button key={a._id} onClick={() => navigate(`/host/accommodation/${a._id}`)}
-                    className="group bg-white rounded-xl border border-slate-200/80 overflow-hidden text-left hover:shadow-lg hover:shadow-slate-200/50 hover:border-slate-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2363EB]/30">
+                    className="group bg-white rounded-xl border border-slate-200/80 overflow-hidden text-left hover:shadow-lg hover:shadow-slate-200/50 hover:border-slate-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#595AFD]/30">
                     <div className="aspect-[16/10] bg-slate-100 relative overflow-hidden">
                       {thumb ? (
                         <img src={thumb} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={e => { e.target.style.display = 'none' }} />
@@ -227,7 +227,7 @@ function HostDashboard() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Accommodation Name</label>
                 <input type="text" value={form.name} onChange={e => handleFormChange('name', e.target.value)} required disabled={saving}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                   placeholder="e.g. Cozy Room Downtown" />
               </div>
 
@@ -235,13 +235,13 @@ function HostDashboard() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Address</label>
                   <input type="text" value={form.address} onChange={e => handleFormChange('address', e.target.value)} required disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="Street, locality" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">City</label>
                   <input type="text" value={form.city} onChange={e => handleFormChange('city', e.target.value)} required disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="City" />
                 </div>
               </div>
@@ -250,13 +250,13 @@ function HostDashboard() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Price (per month)</label>
                   <input type="number" value={form.price} onChange={e => handleFormChange('price', e.target.value)} required min="0" disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="5000" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Total Rooms</label>
                   <input type="number" value={form.totalSpace} onChange={e => handleFormChange('totalSpace', e.target.value)} required min="1" disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="e.g. 4" />
                 </div>
               </div>
@@ -264,7 +264,7 @@ function HostDashboard() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Description</label>
                 <textarea value={form.description} onChange={e => handleFormChange('description', e.target.value)} required disabled={saving} rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm resize-none"
                   placeholder="Describe your accommodation..." />
               </div>
 
@@ -277,11 +277,11 @@ function HostDashboard() {
                       <input type="text" value={am.name}
                         onChange={e => { const arr = [...form.amenities]; arr[i] = { ...arr[i], name: e.target.value }; handleFormChange('amenities', arr) }}
                         placeholder="e.g. WiFi, AC" disabled={saving}
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm" />
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm" />
                       <input type="number" value={am.rate}
                         onChange={e => { const arr = [...form.amenities]; arr[i] = { ...arr[i], rate: e.target.value }; handleFormChange('amenities', arr) }}
                         placeholder="₹/mo" min="0" disabled={saving}
-                        className="w-24 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm" />
+                        className="w-24 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm" />
                       <button type="button" onClick={() => handleFormChange('amenities', form.amenities.filter((_, j) => j !== i))} disabled={saving}
                         className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50">
                         <XMarkIcon className="h-4 w-4" />
@@ -289,7 +289,7 @@ function HostDashboard() {
                     </div>
                   ))}
                   <button type="button" onClick={() => handleFormChange('amenities', [...(form.amenities || []), { name: '', rate: '' }])} disabled={saving}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2363EB] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50">
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#595AFD] bg-[#595AFD]/10 hover:bg-[#595AFD]/20 rounded-lg transition-colors disabled:opacity-50">
                     <PlusIcon className="h-3.5 w-3.5" /> Add Amenity
                   </button>
                 </div>
@@ -310,8 +310,8 @@ function HostDashboard() {
                               disabled={saving}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all border ${
                                 form.houseRules?.[key] === opt
-                                  ? 'bg-[#2363EB] text-white border-[#2363EB]'
-                                  : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300'
+                                  ? 'bg-[#595AFD] text-white border-[#595AFD]'
+                                  : 'bg-white text-slate-500 border-slate-200 hover:border-[#7F83FD]/50'
                               } disabled:opacity-50`}>
                               {opt}
                             </button>
@@ -327,7 +327,7 @@ function HostDashboard() {
                           onClick={() => setForm(p => ({ ...p, houseRules: { ...p.houseRules, [key]: !p.houseRules?.[key] } }))}
                           disabled={saving}
                           className={`w-9 h-5 rounded-full transition-all duration-200 flex-shrink-0 relative ${
-                            form.houseRules?.[key] ? 'bg-[#2363EB]' : 'bg-slate-300'
+                            form.houseRules?.[key] ? 'bg-[#595AFD]' : 'bg-slate-300'
                           } disabled:opacity-50`}>
                           <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-200 ${
                             form.houseRules?.[key] ? 'left-[18px]' : 'left-0.5'
@@ -348,7 +348,7 @@ function HostDashboard() {
                   <div className="mb-3">
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                       {images.map((file, i) => (
-                        <div key={i} className="relative group rounded-lg overflow-hidden border border-blue-200 aspect-square bg-blue-50">
+                        <div key={i} className="relative group rounded-lg overflow-hidden border border-[#595AFD]/30 aspect-square bg-[#595AFD]/5">
                           <img src={URL.createObjectURL(file)} alt={`New ${i + 1}`} className="w-full h-full object-cover" />
                           <button type="button" onClick={() => setImages(prev => prev.filter((_, j) => j !== i))} disabled={saving}
                             className="absolute top-1 right-1 p-0.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow hover:bg-red-700 disabled:opacity-50">
@@ -376,7 +376,7 @@ function HostDashboard() {
                   Cancel
                 </button>
                 <button type="submit" disabled={saving}
-                  className="px-5 py-2.5 text-xs font-semibold text-white bg-[#2363EB] hover:bg-[#1b50c7] rounded-xl transition-colors disabled:opacity-50 shadow-md shadow-[#2363EB]/20">
+                  className="px-5 py-2.5 text-xs font-semibold text-white bg-[#595AFD] hover:bg-[#4B4CE6] rounded-xl transition-colors disabled:opacity-50 shadow-md shadow-[#595AFD]/20">
                   {saving ? 'Saving...' : 'Submit for Verification'}
                 </button>
               </div>

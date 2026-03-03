@@ -248,7 +248,7 @@ function HostAccommodationDetail() {
     return (
       <div className="min-h-screen bg-[#f8f9fc] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-[#2363EB] rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-[#595AFD] rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-slate-400">Loading accommodation...</p>
         </div>
       </div>
@@ -261,7 +261,7 @@ function HostAccommodationDetail() {
         <div className="text-center">
           <XCircleIcon className="h-12 w-12 text-red-300 mx-auto mb-3" />
           <p className="text-red-600 text-sm mb-4">{error || 'Accommodation not found'}</p>
-          <button onClick={() => navigate('/host/dashboard')} className="text-sm text-[#2363EB] hover:underline">Back to Dashboard</button>
+          <button onClick={() => navigate('/host/dashboard')} className="text-sm text-[#595AFD] hover:underline">Back to Dashboard</button>
         </div>
       </div>
     )
@@ -345,7 +345,7 @@ function HostAccommodationDetail() {
                   <button key={i} onClick={() => setImgIdx(i)}
                     className={`flex-shrink-0 w-full rounded-lg overflow-hidden border-2 transition-all h-[70px] ${
                       i === imgIdx
-                        ? 'border-[#2363EB] shadow-md ring-1 ring-[#2363EB]/30'
+                        ? 'border-[#595AFD] shadow-md ring-1 ring-[#595AFD]/30'
                         : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-300'
                     }`}>
                     <img src={`${imageBase}${img}`} alt="" className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none' }} />
@@ -361,7 +361,7 @@ function HostAccommodationDetail() {
               {imgs.map((img, i) => (
                 <button key={i} onClick={() => setImgIdx(i)}
                   className={`flex-shrink-0 w-14 h-10 rounded-md overflow-hidden border-2 transition-all ${
-                    i === imgIdx ? 'border-[#2363EB] shadow' : 'border-slate-200 opacity-50 hover:opacity-100'
+                    i === imgIdx ? 'border-[#595AFD] shadow' : 'border-slate-200 opacity-50 hover:opacity-100'
                   }`}>
                   <img src={`${imageBase}${img}`} alt="" className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none' }} />
                 </button>
@@ -381,10 +381,10 @@ function HostAccommodationDetail() {
 
             {/* Stats — only Price and Total Rooms */}
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100/50">
+              <div className="bg-gradient-to-br from-[#595AFD]/5 to-[#7F83FD]/10 rounded-xl p-4 border border-[#595AFD]/20">
                 <div className="flex items-center gap-2 mb-1">
-                  <CurrencyRupeeIcon className="h-4 w-4 text-blue-500" />
-                  <span className="text-xs font-medium text-blue-600/70">Price / month</span>
+                  <CurrencyRupeeIcon className="h-4 w-4 text-[#595AFD]" />
+                  <span className="text-xs font-medium text-[#595AFD]/80">Price / month</span>
                 </div>
                 <p className="text-xl font-bold text-slate-900">₹{acc.price?.toLocaleString()}</p>
               </div>
@@ -407,12 +407,12 @@ function HostAccommodationDetail() {
                     type="date"
                     value={availDate}
                     onChange={e => handleAvailDateChange(e.target.value)}
-                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none"
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none"
                   />
                 </div>
                 <div className="flex items-center gap-4">
                   {availLoading ? (
-                    <div className="w-5 h-5 border-2 border-slate-200 border-t-[#2363EB] rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-slate-200 border-t-[#595AFD] rounded-full animate-spin" />
                   ) : availability ? (
                     <>
                       <div className="text-center">
@@ -491,7 +491,7 @@ function HostAccommodationDetail() {
                 <button key={t.key} onClick={() => setBookingFilter(t.key)}
                   className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all whitespace-nowrap ${
                     bookingFilter === t.key
-                      ? 'bg-[#2363EB] text-white shadow-sm'
+                      ? 'bg-[#595AFD] text-white shadow-sm'
                       : 'text-slate-500 hover:text-slate-800 hover:bg-white'
                   }`}>
                   {t.label}
@@ -503,7 +503,7 @@ function HostAccommodationDetail() {
           <div className="p-5 sm:p-6">
             {bookingsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="w-6 h-6 border-2 border-slate-200 border-t-[#2363EB] rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-slate-200 border-t-[#595AFD] rounded-full animate-spin" />
               </div>
             ) : bookings.length === 0 ? (
               <div className="text-center py-12">
@@ -596,7 +596,7 @@ function HostAccommodationDetail() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Accommodation Name</label>
                 <input type="text" value={form.name} onChange={e => handleFormChange('name', e.target.value)} required disabled={saving}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                   placeholder="e.g. Cozy Room Downtown" />
               </div>
 
@@ -604,13 +604,13 @@ function HostAccommodationDetail() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Address</label>
                   <input type="text" value={form.address} onChange={e => handleFormChange('address', e.target.value)} required disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="Street, locality" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">City</label>
                   <input type="text" value={form.city} onChange={e => handleFormChange('city', e.target.value)} required disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="City" />
                 </div>
               </div>
@@ -619,13 +619,13 @@ function HostAccommodationDetail() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Price (per month)</label>
                   <input type="number" value={form.price} onChange={e => handleFormChange('price', e.target.value)} required min="0" disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="5000" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Total Rooms</label>
                   <input type="number" value={form.totalSpace} onChange={e => handleFormChange('totalSpace', e.target.value)} required min="1" disabled={saving}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm"
                     placeholder="e.g. 4" />
                 </div>
               </div>
@@ -633,7 +633,7 @@ function HostAccommodationDetail() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Description</label>
                 <textarea value={form.description} onChange={e => handleFormChange('description', e.target.value)} required disabled={saving} rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm resize-none"
                   placeholder="Describe your accommodation..." />
               </div>
 
@@ -646,11 +646,11 @@ function HostAccommodationDetail() {
                       <input type="text" value={am.name}
                         onChange={e => { const arr = [...form.amenities]; arr[i] = { ...arr[i], name: e.target.value }; handleFormChange('amenities', arr) }}
                         placeholder="e.g. WiFi, AC" disabled={saving}
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm" />
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm" />
                       <input type="number" value={am.rate}
                         onChange={e => { const arr = [...form.amenities]; arr[i] = { ...arr[i], rate: e.target.value }; handleFormChange('amenities', arr) }}
                         placeholder="₹/mo" min="0" disabled={saving}
-                        className="w-24 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all disabled:opacity-60 text-sm" />
+                        className="w-24 px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all disabled:opacity-60 text-sm" />
                       <button type="button" onClick={() => handleFormChange('amenities', form.amenities.filter((_, j) => j !== i))} disabled={saving}
                         className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50">
                         <XMarkIcon className="h-4 w-4" />
@@ -658,7 +658,7 @@ function HostAccommodationDetail() {
                     </div>
                   ))}
                   <button type="button" onClick={() => handleFormChange('amenities', [...(form.amenities || []), { name: '', rate: '' }])} disabled={saving}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2363EB] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50">
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#595AFD] bg-[#595AFD]/10 hover:bg-[#595AFD]/20 rounded-lg transition-colors disabled:opacity-50">
                     <PlusIcon className="h-3.5 w-3.5" /> Add Amenity
                   </button>
                 </div>
@@ -679,8 +679,8 @@ function HostAccommodationDetail() {
                               disabled={saving}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all border ${
                                 form.houseRules?.[key] === opt
-                                  ? 'bg-[#2363EB] text-white border-[#2363EB]'
-                                  : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300'
+                                  ? 'bg-[#595AFD] text-white border-[#595AFD]'
+                                  : 'bg-white text-slate-500 border-slate-200 hover:border-[#7F83FD]/50'
                               } disabled:opacity-50`}>
                               {opt}
                             </button>
@@ -696,7 +696,7 @@ function HostAccommodationDetail() {
                           onClick={() => setForm(p => ({ ...p, houseRules: { ...p.houseRules, [key]: !p.houseRules?.[key] } }))}
                           disabled={saving}
                           className={`w-9 h-5 rounded-full transition-all duration-200 flex-shrink-0 relative ${
-                            form.houseRules?.[key] ? 'bg-[#2363EB]' : 'bg-slate-300'
+                            form.houseRules?.[key] ? 'bg-[#595AFD]' : 'bg-slate-300'
                           } disabled:opacity-50`}>
                           <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-200 ${
                             form.houseRules?.[key] ? 'left-[18px]' : 'left-0.5'
@@ -736,13 +736,13 @@ function HostAccommodationDetail() {
                     <p className="text-[11px] text-slate-400 mb-2">New images ({newImages.length})</p>
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                       {newImages.map((file, i) => (
-                        <div key={i} className="relative group rounded-lg overflow-hidden border border-blue-200 aspect-square bg-blue-50">
+                        <div key={i} className="relative group rounded-lg overflow-hidden border border-[#595AFD]/30 aspect-square bg-[#595AFD]/5">
                           <img src={URL.createObjectURL(file)} alt={`New ${i + 1}`} className="w-full h-full object-cover" />
                           <button type="button" onClick={() => setNewImages(prev => prev.filter((_, j) => j !== i))} disabled={saving}
                             className="absolute top-1 right-1 p-0.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow hover:bg-red-700 disabled:opacity-50">
                             <XMarkIcon className="h-3 w-3" />
                           </button>
-                          <div className="absolute bottom-0 inset-x-0 bg-blue-600/80 text-white text-[9px] text-center py-px">New</div>
+                          <div className="absolute bottom-0 inset-x-0 bg-[#595AFD]/80 text-white text-[9px] text-center py-px">New</div>
                         </div>
                       ))}
                     </div>
@@ -765,7 +765,7 @@ function HostAccommodationDetail() {
                   Cancel
                 </button>
                 <button type="submit" disabled={saving}
-                  className="px-5 py-2.5 text-xs font-semibold text-white bg-[#2363EB] hover:bg-[#1b50c7] rounded-xl transition-colors disabled:opacity-50 shadow-md shadow-[#2363EB]/20">
+                  className="px-5 py-2.5 text-xs font-semibold text-white bg-[#595AFD] hover:bg-[#4B4CE6] rounded-xl transition-colors disabled:opacity-50 shadow-md shadow-[#595AFD]/20">
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>

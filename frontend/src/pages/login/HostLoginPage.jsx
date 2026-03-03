@@ -126,7 +126,7 @@ function HostLoginPage() {
             <div className="w-full max-w-md mx-auto">
               <div className="mb-10">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-11 h-11 rounded-xl bg-[#2363EB] flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-xl bg-[#595AFD] flex items-center justify-center">
                     <BuildingOffice2Icon className="h-6 w-6 text-white" />
                   </div>
                   <span className="text-lg font-bold text-slate-900 tracking-tight">Room Pool</span>
@@ -156,7 +156,7 @@ function HostLoginPage() {
                       onChange={(e) => handlePhoneChange(e.target.value, setPhone, setPhoneError)}
                       required
                       disabled={loginLoading}
-                      className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all duration-200 disabled:opacity-60 text-sm ${phoneError ? 'border-red-300' : 'border-slate-200'}`}
+                      className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all duration-200 disabled:opacity-60 text-sm ${phoneError ? 'border-red-300' : 'border-slate-200'}`}
                       placeholder="9876543210"
                     />
                   </div>
@@ -173,7 +173,7 @@ function HostLoginPage() {
                     required
                     disabled={loginLoading}
                     maxLength={4}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all duration-200 disabled:opacity-60 text-sm tracking-widest"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all duration-200 disabled:opacity-60 text-sm tracking-widest"
                     placeholder="••••"
                   />
                   <p className="text-slate-400 text-xs mt-1.5">Use OTP <span className="font-mono font-medium text-slate-500">9876</span> for demo</p>
@@ -182,7 +182,7 @@ function HostLoginPage() {
                 <button
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full py-3 px-4 bg-[#2363EB] text-white font-semibold rounded-xl hover:bg-[#1b50c7] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#2363EB]/25 mt-2"
+                  className="w-full py-3 px-4 bg-[#595AFD] text-white font-semibold rounded-xl hover:bg-[#4B4CE6] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#595AFD]/25 mt-2"
                 >
                   {loginLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -199,7 +199,7 @@ function HostLoginPage() {
                   <button
                     type="button"
                     onClick={() => { setIsRegister(true); setLoginError(''); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
-                    className="text-[#2363EB] font-semibold hover:underline"
+                    className="text-[#595AFD] font-semibold hover:underline"
                   >
                     Register here
                   </button>
@@ -209,95 +209,112 @@ function HostLoginPage() {
           </div>
         </>
       ) : (
-        <div className="w-full flex flex-col items-center justify-center p-8 bg-slate-100 min-h-screen overflow-y-auto">
-          <div className="w-full max-w-lg">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#2363EB]/10">
-                <BuildingOffice2Icon className="h-6 w-6 text-[#2363EB]" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">Host Registration</h1>
-                <p className="text-slate-500 text-sm">Create your host account to list accommodations</p>
-              </div>
-            </div>
+        <div className="flex w-full min-h-screen overflow-hidden">
+          {/* Image panel — same as login */}
+          <div className="hidden lg:flex lg:w-2/5 flex-shrink-0 items-center justify-center h-screen overflow-hidden">
+            <img
+              src={hostLoginImg}
+              alt="Host illustration"
+              className="h-full w-full object-cover drop-shadow-xl"
+            />
+          </div>
 
-            <SuccessModal message={registerSuccess} onClose={() => setRegisterSuccess('')} />
-
-            <form onSubmit={handleRegisterSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
-              <div className="p-8 md:p-12 space-y-6">
-                {registerError && (
-                  <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm flex items-start gap-3" role="alert">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-200 flex items-center justify-center text-red-600 text-xs font-bold">!</span>
-                    {registerError}
+          {/* Registration form panel */}
+          <div className="w-full lg:w-3/5 flex flex-col min-h-screen overflow-y-auto bg-slate-50">
+            <div className="flex flex-col justify-center flex-1 px-8 lg:px-20 py-8">
+              <div className="w-full max-w-md mx-auto">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#595AFD]/10">
+                    <BuildingOffice2Icon className="h-6 w-6 text-[#595AFD]" />
                   </div>
-                )}
+                  <div>
+                    <h1 className="text-xl font-bold text-slate-900">Host Registration</h1>
+                    <p className="text-slate-500 text-sm">Create your host account to list accommodations</p>
+                  </div>
+                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    value={hostName}
-                    onChange={(e) => setHostName(e.target.value)}
-                    required
-                    disabled={registerLoading}
-                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all"
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={hostEmail}
-                    onChange={(e) => { setHostEmail(e.target.value); setRegEmailError('') }}
-                    onBlur={() => handleEmailBlur(hostEmail, setRegEmailError)}
-                    required
-                    disabled={registerLoading}
-                    className={`w-full px-4 py-3.5 rounded-xl border bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all ${regEmailError ? 'border-red-300' : 'border-slate-200'}`}
-                    placeholder="john@example.com"
-                  />
-                  {regEmailError && <p className="text-red-500 text-xs mt-1">{regEmailError}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Phone <span className="text-slate-400 font-normal">(used for login)</span></label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">+91</span>
+                <SuccessModal message={registerSuccess} onClose={() => setRegisterSuccess('')} />
+
+                <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                  {registerError && (
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm flex items-start gap-3" role="alert">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-200 flex items-center justify-center text-red-600 text-xs font-bold">!</span>
+                      {registerError}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
                     <input
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={10}
-                      value={hostPhone}
-                      onChange={(e) => handlePhoneChange(e.target.value, setHostPhone, setRegPhoneError)}
+                      type="text"
+                      value={hostName}
+                      onChange={(e) => setHostName(e.target.value)}
                       required
                       disabled={registerLoading}
-                      className={`w-full pl-12 pr-4 py-3.5 rounded-xl border bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-[#2363EB]/20 focus:border-[#2363EB] outline-none transition-all ${regPhoneError ? 'border-red-300' : 'border-slate-200'}`}
-                      placeholder="9876543210"
+                      className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all"
+                      placeholder="John Doe"
                     />
                   </div>
-                  {regPhoneError && <p className="text-red-500 text-xs mt-1">{regPhoneError}</p>}
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={hostEmail}
+                      onChange={(e) => { setHostEmail(e.target.value); setRegEmailError('') }}
+                      onBlur={() => handleEmailBlur(hostEmail, setRegEmailError)}
+                      required
+                      disabled={registerLoading}
+                      className={`w-full px-4 py-3.5 rounded-xl border bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all ${regEmailError ? 'border-red-300' : 'border-slate-200'}`}
+                      placeholder="john@example.com"
+                    />
+                    {regEmailError && <p className="text-red-500 text-xs mt-1">{regEmailError}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Phone <span className="text-slate-400 font-normal">(used for login)</span></label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">+91</span>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        value={hostPhone}
+                        onChange={(e) => handlePhoneChange(e.target.value, setHostPhone, setRegPhoneError)}
+                        required
+                        disabled={registerLoading}
+                        className={`w-full pl-12 pr-4 py-3.5 rounded-xl border bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all ${regPhoneError ? 'border-red-300' : 'border-slate-200'}`}
+                        placeholder="9876543210"
+                      />
+                    </div>
+                    {regPhoneError && <p className="text-red-500 text-xs mt-1">{regPhoneError}</p>}
+                  </div>
 
-              <div className="px-8 md:px-12 py-6 bg-slate-50/80 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <button
-                  type="submit"
-                  disabled={registerLoading}
-                  className="w-full sm:w-auto px-8 py-3 bg-[#2363EB] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {registerLoading ? 'Registering...' : 'Register'}
-                </button>
-                <p className="text-slate-600 text-sm">
-                  Already registered?{' '}
-                  <button
-                    type="button"
-                    onClick={() => { setIsRegister(false); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
-                    className="text-[#2363EB] font-medium hover:underline"
-                  >
-                    Login
-                  </button>
-                </p>
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                    <button
+                      type="submit"
+                      disabled={registerLoading}
+                      className="w-full sm:w-auto px-8 py-3 bg-[#595AFD] text-white font-semibold rounded-xl hover:bg-[#4B4CE6] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#595AFD]/25"
+                    >
+                      {registerLoading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Registering...
+                        </span>
+                      ) : 'Register'}
+                    </button>
+                    <p className="text-slate-600 text-sm">
+                      Already registered?{' '}
+                      <button
+                        type="button"
+                        onClick={() => { setIsRegister(false); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
+                        className="text-[#595AFD] font-semibold hover:underline"
+                      >
+                        Login
+                      </button>
+                    </p>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

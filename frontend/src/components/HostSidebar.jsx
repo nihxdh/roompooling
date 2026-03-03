@@ -32,7 +32,7 @@ function HostSidebar() {
       {/* Branding */}
       <div className="px-5 pt-6 pb-5">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#2363EB] to-[#1b4fd4] text-white shadow-lg shadow-[#2363EB]/20">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#595AFD] to-[#7F83FD] text-white shadow-lg shadow-[#595AFD]/20">
             <BuildingOffice2Icon className="h-5 w-5" />
           </div>
           <div>
@@ -53,11 +53,11 @@ function HostSidebar() {
               onClick={() => { navigate(item.href); setMobileOpen(false) }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 active
-                  ? 'bg-[#2363EB]/10 text-[#2363EB]'
+                  ? 'bg-[#595AFD]/10 text-[#595AFD]'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
               }`}
             >
-              <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${active ? 'text-[#2363EB]' : 'text-slate-400'}`} />
+              <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${active ? 'text-[#595AFD]' : 'text-slate-400'}`} />
               {item.label}
             </button>
           )

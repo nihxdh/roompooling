@@ -50,7 +50,7 @@ function HostMessages() {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Page header */}
         <div className="bg-white border-b border-slate-200/80 px-6 py-4 md:px-8 flex items-center gap-3">
-          <ChatBubbleLeftRightIcon className="h-5 w-5 text-[#2363EB]" />
+          <ChatBubbleLeftRightIcon className="h-5 w-5 text-[#595AFD]" />
           <div>
             <h1 className="text-lg font-bold text-slate-900 leading-tight">Messages</h1>
             <p className="text-xs text-slate-400">Conversations with seekers</p>
@@ -63,7 +63,7 @@ function HostMessages() {
           <div className={`${activeConv && !showList ? 'hidden md:flex' : 'flex'} w-full md:w-80 flex-col border-r border-slate-200 bg-white`}>
             {loading ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-slate-200 border-t-[#2363EB] rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-slate-200 border-t-[#595AFD] rounded-full animate-spin" />
               </div>
             ) : conversations.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-slate-400 px-6 text-center">
@@ -78,7 +78,7 @@ function HostMessages() {
                   return (
                     <button key={c._id} onClick={() => { setActiveConv(c); setShowList(false) }}
                       className={`w-full px-4 py-3.5 flex gap-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 ${
-                        isActive ? 'bg-blue-50/70 border-l-2 border-l-[#2363EB]' : ''
+                        isActive ? 'bg-[#595AFD]/10 border-l-2 border-l-[#595AFD]' : ''
                       }`}>
                       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center flex-shrink-0">
                         <UserIcon className="h-4 w-4 text-slate-400" />
