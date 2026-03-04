@@ -10,8 +10,6 @@ const userAuth = require('../middleware/userAuth');
 const { calculateBookingPrice } = require('../utils/bookingPricing');
 const userRoutes = express.Router();
 
-const STATIC_OTP = '1234';
-
 async function getAvailableSpaces(accommodationId, checkIn, checkOut, excludeBookingId) {
     const accommodation = await Accomodation.findById(accommodationId);
     if (!accommodation) return null;
@@ -334,10 +332,10 @@ userRoutes.post('/register', async (req, res) => {
 // POST /api/user/login
 userRoutes.post('/login', async (req, res) => {
     try {
-        const { phone, otp, password } = req.body;
+        const { phone, password } = req.body;
 
-        if (!phone || !otp) {
-            return res.status(400).json({ error: 'Phone number and OTP are required' });
+        if (!phone || !password) {
+            return res.status(400).json({ error: 'Phone number and password are required' });
         }
 
         const user = await User.findOne({ phone }).select('+password');
@@ -345,18 +343,13 @@ userRoutes.post('/login', async (req, res) => {
             return res.status(404).json({ error: 'Phone number not registered. Please register first.' });
         }
 
-        if (otp !== STATIC_OTP) {
-            return res.status(401).json({ error: 'Invalid OTP' });
+        if (!user.password) {
+            return res.status(401).json({ error: 'Account has no password. Please register again or contact support.' });
         }
 
-        if (user.password) {
-            if (!password) {
-                return res.status(400).json({ error: 'Password is required for login' });
-            }
-            const match = await bcrypt.compare(password, user.password);
-            if (!match) {
-                return res.status(401).json({ error: 'Invalid password' });
-            }
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).json({ error: 'Invalid password' });
         }
 
         const token = jwt.sign(

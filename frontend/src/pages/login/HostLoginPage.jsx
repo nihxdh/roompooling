@@ -13,7 +13,7 @@ function HostLoginPage() {
 
   // Login state
   const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
+  const [password, setPassword] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
 
@@ -21,6 +21,7 @@ function HostLoginPage() {
   const [hostName, setHostName] = useState('')
   const [hostEmail, setHostEmail] = useState('')
   const [hostPhone, setHostPhone] = useState('')
+  const [hostPassword, setHostPassword] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
   const [registerError, setRegisterError] = useState('')
   const [registerSuccess, setRegisterSuccess] = useState('')
@@ -49,9 +50,13 @@ function HostLoginPage() {
       setPhoneError('Enter a valid 10-digit phone number')
       return
     }
+    if (!password || password.length < 6) {
+      setLoginError('Password is required')
+      return
+    }
     setLoginLoading(true)
     try {
-      const { data } = await axios.post(`${API_BASE}/api/host/login`, { phone, otp })
+      const { data } = await axios.post(`${API_BASE}/api/host/login`, { phone, password })
       if (data.success && data.token) {
         localStorage.setItem('hostToken', data.token)
         navigate('/host/dashboard', { replace: true })
@@ -81,18 +86,24 @@ function HostLoginPage() {
       setRegPhoneError('Enter a valid 10-digit phone number')
       return
     }
+    if (!hostPassword || hostPassword.length < 6) {
+      setRegisterError('Password must be at least 6 characters')
+      return
+    }
     setRegisterLoading(true)
     try {
       const { data } = await axios.post(`${API_BASE}/api/host/register`, {
         name: hostName,
         email: hostEmail,
-        phone: hostPhone
+        phone: hostPhone,
+        password: hostPassword
       })
       if (data.success) {
-        setRegisterSuccess('Registration successful! You can now login with your phone number and OTP 9876.')
+        setRegisterSuccess('Registration successful! You can now login with your phone number and password.')
         setHostName('')
         setHostEmail('')
         setHostPhone('')
+        setHostPassword('')
       } else {
         setRegisterError(data.error || 'Registration failed.')
       }
@@ -164,19 +175,17 @@ function HostLoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="otp" className="block text-sm font-medium text-slate-700 mb-1.5">One-Time Password</label>
+                  <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
                   <input
-                    id="otp"
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loginLoading}
-                    maxLength={4}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all duration-200 disabled:opacity-60 text-sm tracking-widest"
-                    placeholder="••••"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all duration-200 disabled:opacity-60 text-sm"
+                    placeholder="••••••"
                   />
-                  <p className="text-slate-400 text-xs mt-1.5">Use OTP <span className="font-mono font-medium text-slate-500">9876</span> for demo</p>
                 </div>
 
                 <button
@@ -198,7 +207,7 @@ function HostLoginPage() {
                   New host?{' '}
                   <button
                     type="button"
-                    onClick={() => { setIsRegister(true); setLoginError(''); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
+                    onClick={() => { setIsRegister(true); setLoginError(''); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError(''); setPassword('') }}
                     className="text-[#595AFD] font-semibold hover:underline"
                   >
                     Register here
@@ -288,6 +297,20 @@ function HostLoginPage() {
                     {regPhoneError && <p className="text-red-500 text-xs mt-1">{regPhoneError}</p>}
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                    <input
+                      type="password"
+                      value={hostPassword}
+                      onChange={(e) => setHostPassword(e.target.value)}
+                      required
+                      disabled={registerLoading}
+                      minLength={6}
+                      className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#595AFD]/20 focus:border-[#595AFD] outline-none transition-all"
+                      placeholder="At least 6 characters"
+                    />
+                  </div>
+
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                     <button
                       type="submit"
@@ -305,7 +328,7 @@ function HostLoginPage() {
                       Already registered?{' '}
                       <button
                         type="button"
-                        onClick={() => { setIsRegister(false); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError('') }}
+                        onClick={() => { setIsRegister(false); setRegisterError(''); setRegisterSuccess(''); setPhoneError(''); setRegPhoneError(''); setRegEmailError(''); setHostPassword('') }}
                         className="text-[#595AFD] font-semibold hover:underline"
                       >
                         Login

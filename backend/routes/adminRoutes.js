@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const Host = require('../models/host');
 const Accomodation = require('../models/accomodation');
 const Booking = require('../models/booking');
 const adminAuth = require('../middleware/adminAuth');
@@ -141,6 +142,99 @@ adminRoutes.put('/users/:id/password', adminAuth, async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
+        res.json({ success: true, message: 'Password updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ========== Host CRUD (protected) ==========
+
+// GET /api/admin/hosts - List all hosts
+adminRoutes.get('/hosts', adminAuth, async (req, res) => {
+    try {
+        const hosts = await Host.find().sort({ createdAt: -1 });
+        res.json({ success: true, hosts });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/admin/hosts/:id - Get host by ID
+adminRoutes.get('/hosts/:id', adminAuth, async (req, res) => {
+    try {
+        const host = await Host.findById(req.params.id);
+        if (!host) return res.status(404).json({ error: 'Host not found' });
+        res.json({ success: true, host });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/admin/hosts - Create host
+adminRoutes.post('/hosts', adminAuth, async (req, res) => {
+    try {
+        const { name, email, phone, password } = req.body;
+        if (!name || !email || !phone) {
+            return res.status(400).json({ error: 'Name, email and phone are required' });
+        }
+        const existing = await Host.findOne({ $or: [{ email }, { phone }] });
+        if (existing) {
+            const field = existing.email === email ? 'Email' : 'Phone';
+            return res.status(400).json({ error: `${field} already registered` });
+        }
+        const payload = { name, email, phone };
+        if (password && password.length >= 6) {
+            payload.password = await bcrypt.hash(password, 10);
+        }
+        const host = await Host.create(payload);
+        res.status(201).json({ success: true, host });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT /api/admin/hosts/:id - Update host
+adminRoutes.put('/hosts/:id', adminAuth, async (req, res) => {
+    try {
+        const { name, email, phone } = req.body;
+        const updates = {};
+        if (name !== undefined) updates.name = name;
+        if (email !== undefined) updates.email = email;
+        if (phone !== undefined) updates.phone = phone;
+
+        const host = await Host.findByIdAndUpdate(req.params.id, updates, { new: true });
+        if (!host) return res.status(404).json({ error: 'Host not found' });
+        res.json({ success: true, host });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// DELETE /api/admin/hosts/:id - Delete host
+adminRoutes.delete('/hosts/:id', adminAuth, async (req, res) => {
+    try {
+        const host = await Host.findByIdAndDelete(req.params.id);
+        if (!host) return res.status(404).json({ error: 'Host not found' });
+        await Accomodation.deleteMany({ host: req.params.id });
+        res.json({ success: true, message: 'Host deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT /api/admin/hosts/:id/password - Admin set/change host password
+adminRoutes.put('/hosts/:id/password', adminAuth, async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters' });
+        }
+        const host = await Host.findById(req.params.id);
+        if (!host) return res.status(404).json({ error: 'Host not found' });
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        host.password = hashedPassword;
+        await host.save();
         res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -12,7 +12,6 @@ function SeekerLoginPage() {
   const navigate = useNavigate()
 
   const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
   const [password, setPassword] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
@@ -66,9 +65,13 @@ function SeekerLoginPage() {
       setPhoneError('Enter a valid 10-digit phone number')
       return
     }
+    if (!password || password.length < 6) {
+      setLoginError('Password is required')
+      return
+    }
     setLoginLoading(true)
     try {
-      const { data } = await axios.post(`${API_BASE}/api/user/login`, { phone, otp, password: password || undefined })
+      const { data } = await axios.post(`${API_BASE}/api/user/login`, { phone, password })
       if (data.success && data.token) {
         localStorage.setItem('seekerToken', data.token)
         navigate('/seeker/dashboard', { replace: true })
@@ -113,7 +116,7 @@ function SeekerLoginPage() {
         password: regPassword,
       })
       if (data.success) {
-        setRegisterSuccess('Registration successful! You can now login with your phone number, OTP 1234, and password.')
+        setRegisterSuccess('Registration successful! You can now login with your phone number and password.')
         setRegName('')
         setRegEmail('')
         setRegPhone('')
@@ -200,33 +203,17 @@ function SeekerLoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="otp" className="block text-sm font-medium text-slate-700 mb-1.5">One-Time Password</label>
-                  <input
-                    id="otp"
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    required
-                    disabled={loginLoading}
-                    maxLength={4}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all duration-200 disabled:opacity-60 text-sm tracking-widest"
-                    placeholder="••••"
-                  />
-                  <p className="text-slate-400 text-xs mt-1.5">Use OTP <span className="font-mono font-medium text-slate-500">1234</span> for demo</p>
-                </div>
-
-                <div>
                   <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
                   <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                     disabled={loginLoading}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#8A7BF9]/20 focus:border-[#8A7BF9] outline-none transition-all duration-200 disabled:opacity-60 text-sm"
                     placeholder="••••••"
                   />
-                  <p className="text-slate-400 text-xs mt-1.5">Required if you set one during registration</p>
                 </div>
 
                 <button

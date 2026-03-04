@@ -4,6 +4,7 @@ import {
   BuildingOffice2Icon,
   CalendarDaysIcon,
   UsersIcon,
+  HomeModernIcon,
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
@@ -13,6 +14,7 @@ import {
 const NAV_ITEMS = [
   { key: 'accommodations', label: 'Accommodations', icon: BuildingOffice2Icon, path: '/admin/dashboard' },
   { key: 'bookings', label: 'Bookings', icon: CalendarDaysIcon, path: '/admin/bookings' },
+  { key: 'hosts', label: 'Hosts', icon: HomeModernIcon, path: '/admin/hosts' },
   { key: 'users', label: 'Users', icon: UsersIcon, path: '/admin/users' },
 ]
 

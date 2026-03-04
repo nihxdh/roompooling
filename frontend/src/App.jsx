@@ -8,10 +8,12 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminBookings from './pages/admin/AdminBookings'
 import AdminUserManagement from './pages/admin/AdminUserManagement'
+import AdminHostManagement from './pages/admin/AdminHostManagement'
 import HostDashboard from './pages/HostDashboard'
 import HostAccommodationDetail from './pages/HostAccommodationDetail'
 import HostBookings from './pages/HostBookings'
 import HostMessages from './pages/HostMessages'
+import HostProfile from './pages/HostProfile'
 import SeekerDashboard from './pages/SeekerDashboard'
 import SeekerProfile from './pages/SeekerProfile'
 import SeekerBookings from './pages/SeekerBookings'
@@ -28,6 +30,7 @@ function App() {
         <Route path="/host/accommodation/:id" element={<HostAccommodationDetail />} />
         <Route path="/host/bookings" element={<HostBookings />} />
         <Route path="/host/messages" element={<HostMessages />} />
+        <Route path="/host/profile" element={<HostProfile />} />
         <Route path="/login/seeker" element={<SeekerLoginPage />} />
         <Route path="/seeker/dashboard" element={<SeekerDashboard />} />
         <Route path="/seeker/profile" element={<SeekerProfile />} />
@@ -39,6 +42,7 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="bookings" element={<AdminBookings />} />
+          <Route path="hosts" element={<AdminHostManagement />} />
           <Route path="users" element={<AdminUserManagement />} />
         </Route>
       </Routes>

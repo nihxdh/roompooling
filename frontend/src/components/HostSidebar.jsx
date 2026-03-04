@@ -4,6 +4,7 @@ import {
   BuildingOffice2Icon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
+  UserCircleIcon,
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
   { key: 'accommodations', label: 'Accommodations', icon: BuildingOffice2Icon, href: '/host/dashboard', match: ['/host/dashboard', '/host/accommodation'] },
   { key: 'bookings', label: 'Bookings', icon: CalendarDaysIcon, href: '/host/bookings', match: ['/host/bookings'] },
   { key: 'messages', label: 'Messages', icon: ChatBubbleLeftRightIcon, href: '/host/messages', match: ['/host/messages'] },
+  { key: 'profile', label: 'Profile', icon: UserCircleIcon, href: '/host/profile', match: ['/host/profile'] },
 ]
 
 function HostSidebar() {

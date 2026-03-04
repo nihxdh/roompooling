@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
 const Host = require('../models/host');
@@ -11,8 +12,6 @@ const hostAuth = require('../middleware/hostAuth');
 const { uploadImages, slugify } = require('../config/multer');
 const { calculateBookingPrice } = require('../utils/bookingPricing');
 const hostRoutes = express.Router();
-
-const HOST_OTP = '9876';
 
 async function getAvailableSpacesForDates(accommodationId, checkIn, checkOut, excludeBookingId) {
     const accommodation = await Accomodation.findById(accommodationId);
@@ -61,7 +60,7 @@ const parseBodyField = (val) => {
 // POST /api/host/register
 hostRoutes.post('/register', async (req, res) => {
     try {
-        const { name, email, phone } = req.body;
+        const { name, email, phone, password } = req.body;
 
         if (!name || !email || !phone) {
             return res.status(400).json({ error: 'Name, email and phone are required' });
@@ -73,7 +72,12 @@ hostRoutes.post('/register', async (req, res) => {
             return res.status(400).json({ error: `${field} already registered` });
         }
 
-        const host = await Host.create({ name, email, phone });
+        const payload = { name, email, phone };
+        if (password && password.length >= 6) {
+            payload.password = await bcrypt.hash(password, 10);
+        }
+
+        const host = await Host.create(payload);
 
         res.status(201).json({
             success: true,
@@ -88,19 +92,24 @@ hostRoutes.post('/register', async (req, res) => {
 // POST /api/host/login
 hostRoutes.post('/login', async (req, res) => {
     try {
-        const { phone, otp } = req.body;
+        const { phone, password } = req.body;
 
-        if (!phone || !otp) {
-            return res.status(400).json({ error: 'Phone number and OTP are required' });
+        if (!phone || !password) {
+            return res.status(400).json({ error: 'Phone number and password are required' });
         }
 
-        const host = await Host.findOne({ phone });
+        const host = await Host.findOne({ phone }).select('+password');
         if (!host) {
             return res.status(404).json({ error: 'Phone number not registered. Please register first.' });
         }
 
-        if (otp !== HOST_OTP) {
-            return res.status(401).json({ error: 'Invalid OTP' });
+        if (!host.password) {
+            return res.status(401).json({ error: 'Account has no password. Please set your password in account settings or contact support.' });
+        }
+
+        const match = await bcrypt.compare(password, host.password);
+        if (!match) {
+            return res.status(401).json({ error: 'Invalid password' });
         }
 
         const token = jwt.sign(
@@ -128,6 +137,33 @@ hostRoutes.get('/profile', hostAuth, async (req, res) => {
         const host = await Host.findById(req.hostData.hostId);
         if (!host) return res.status(404).json({ error: 'Host not found' });
         res.json({ success: true, host });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT /api/host/password - Change own password
+hostRoutes.put('/password', hostAuth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters' });
+        }
+        const host = await Host.findById(req.hostData.hostId).select('+password');
+        if (!host) return res.status(404).json({ error: 'Host not found' });
+        if (host.password) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Current password is required to change password' });
+            }
+            const match = await bcrypt.compare(currentPassword, host.password);
+            if (!match) {
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        host.password = hashedPassword;
+        await host.save();
+        res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
